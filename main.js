@@ -16,7 +16,7 @@ function createWindow() {
       contextIsolation: false
     },
     backgroundColor: '#1e1e1e',
-    title: 'Claude Code Terminal'
+    title: 'Atlas - Claude Code IDE'
   });
 
   mainWindow.loadFile('index.html');

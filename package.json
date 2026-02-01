@@ -1,8 +1,8 @@
 {
-  "name": "frame",
-  "productName": "Frame",
+  "name": "atlas",
+  "productName": "Atlas",
   "version": "1.0.0",
-  "description": "Frame - Project Management IDE for Claude Code",
+  "description": "Atlas - Project Management IDE for Claude Code",
   "main": "src/main/index.js",
   "scripts": {
     "postinstall": "electron-rebuild",
@@ -19,7 +19,7 @@
     "electron",
     "terminal",
     "claude",
-    "frame",
+    "atlas",
     "ide",
     "project-management"
   ],
@@ -37,8 +37,8 @@
     "xterm-addon-fit": "^0.8.0"
   },
   "build": {
-    "appId": "com.frame.ide",
-    "productName": "Frame",
+    "appId": "com.atlas.ide",
+    "productName": "Atlas",
     "mac": {
       "category": "public.app-category.developer-tools",
       "target": "dir"

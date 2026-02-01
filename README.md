@@ -1,11 +1,11 @@
-# Frame
+# Atlas
 
 A lightweight, IDE-style desktop application built specifically for working with [Claude Code](https://claude.com/claude-code). Think VS Code, but streamlined for Claude Code workflows.
 <img width="1464" height="852" alt="Screenshot 2026-01-28 at 01 00 37" src="https://github.com/user-attachments/assets/8699c91f-35ea-4c3d-b871-56962e427017" />
 
 ## What is this?
 
-Frame is a project management IDE for Claude Code that aims to:
+Atlas is a project management IDE for Claude Code that aims to:
 
 1. **Bring a standard to Claude Code projects** - Consistent project structure with CLAUDE.md, STRUCTURE.json, PROJECT_NOTES.md, and tasks.json
 2. **Improve context and memory problems as projects grow** - Automatic context preservation, session notes, and decision tracking
@@ -23,7 +23,7 @@ The key innovation: **Claude Code launches directly in your selected project dir
 
 **The Core Problem**: As projects grow with Claude Code, context gets lost between sessions. Decisions are forgotten, tasks slip through the cracks, and you end up re-explaining the same things over and over.
 
-**Frame's Solution**: A standardized project structure that Claude Code reads automatically at the start of each session, combined with tools to track decisions, tasks, and context - so nothing gets lost.
+**Atlas's Solution**: A standardized project structure that Claude Code reads automatically at the start of each session, combined with tools to track decisions, tasks, and context - so nothing gets lost.
 
 When working with Claude Code, you often need to:
 1. See your project structure
@@ -63,7 +63,7 @@ This app does all of that in one window, with a clean VS Code-inspired interface
 - **Prompt History**: All commands saved with timestamps, viewable in side panel
 - **Cross-Platform**: Windows, macOS, Linux support
 
-### Frame Project Management
+### Atlas Project Management
 - **Task Detection**: Claude Code automatically detects tasks from conversations and asks to add them to tasks.json
 - **Task Panel**: Visual task management with filters (All, Pending, In Progress, Completed)
 - **Manual Task Creation**: Add tasks manually through the UI
@@ -106,7 +106,7 @@ This app does all of that in one window, with a clean VS Code-inspired interface
 
 | Component | Technology | Why? |
 |-----------|-----------|------|
-| Desktop Framework | Electron 28 | Cross-platform, mature, well-documented |
+| Desktop Atlaswork | Electron 28 | Cross-platform, mature, well-documented |
 | Terminal Emulator | xterm.js 5.3 | Industry standard (used by VS Code) |
 | PTY | node-pty 1.0 | Real pseudo-terminal, not subprocess pipes |
 | Bundler | esbuild | Fast bundling for modular renderer code |
@@ -129,8 +129,8 @@ This app does all of that in one window, with a clean VS Code-inspired interface
 
 ```bash
 # Clone the repo
-git clone https://github.com/kaanozhan/Frame.git
-cd Frame
+git clone https://github.com/gotime4/Atlas.git
+cd Atlas
 
 # Install dependencies
 npm install
@@ -197,7 +197,7 @@ npm install -g @anthropic-ai/claude-code
 ### Project Structure
 
 ```
-Frame/
+Atlas/
 ├── src/
 │   ├── main/                # Electron main process
 │   │   ├── index.js         # Main entry, window & IPC management

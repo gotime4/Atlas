@@ -1,6 +1,6 @@
-# ClaudeCodeIDE - Frame Project
+# ClaudeCodeIDE - Atlas Project
 
-This project is managed with **Frame**. Keep the documentation up to date by following the rules below.
+This project is managed with **Atlas**. Keep the documentation up to date by following the rules below.
 
 ---
 
@@ -123,7 +123,7 @@ Conversation/decision as is, with its context...
 
 ## 📝 Context Preservation (Automatic Note Taking)
 
-Frame's core purpose is to prevent context loss. Therefore, capture important moments and ask the user.
+Atlas's core purpose is to prevent context loss. Therefore, capture important moments and ask the user.
 
 ### When to Ask?
 
@@ -222,5 +222,5 @@ No problem, continue. The user can also say what they consider important themsel
 
 ---
 
-*This file was automatically created by Frame.*
+*This file was automatically created by Atlas.*
 *Creation date: 2026-01-24*

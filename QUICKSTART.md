@@ -3,14 +3,14 @@
 <!-- For Claude: Read this FIRST to quickly understand how to work with this project. Contains setup instructions, common commands, and key files to know. -->
 <!-- Last Updated: 2026-01-26 -->
 
-# Frame - Quick Start Guide
+# Atlas - Quick Start Guide
 
 ## Setup
 
 ```bash
 # Clone and install
-git clone https://github.com/kaanozhan/Frame.git
-cd Frame
+git clone https://github.com/gotime4/Atlas.git
+cd Atlas
 npm install
 ```
 
@@ -43,8 +43,8 @@ npm run dist
 ## Project Structure
 
 ```
-Frame/
-├── .frame/           # Frame configuration
+Atlas/
+├── .frame/           # Atlas configuration
 ├── src/
 │   ├── main/         # Electron main process
 │   ├── renderer/     # Electron renderer (UI)
@@ -64,7 +64,7 @@ Frame/
 
 ## Quick Context
 
-Frame is a project management IDE for Claude Code. It provides:
+Atlas is a project management IDE for Claude Code. It provides:
 - Visual task management
 - Context preservation between sessions
 - Plugins panel for Claude Code plugins

@@ -1,4 +1,4 @@
-# Frame - Project Documentation
+# Atlas - Project Documentation
 
 ## Project Vision
 
@@ -8,9 +8,9 @@
 - Decisions are forgotten
 - There's no standardization
 
-**Solution:** Frame - a terminal-centric development framework. Not an IDE, but a **framework**.
+**Solution:** Atlas - a terminal-centric development framework. Not an IDE, but a **framework**.
 
-**Why "Frame":** The word means "framework". Within Frame, we create "Frame projects" - with standard documents (CLAUDE.md, tasks.json, STRUCTURE.json), every project has the same structure.
+**Why "Atlas":** The word means "framework". Within Atlas, we create "Atlas projects" - with standard documents (CLAUDE.md, tasks.json, STRUCTURE.json), every project has the same structure.
 
 **Core Philosophy:**
 - **Terminal-first:** The center is not a code editor, but the terminal. Even multiple terminals (grid).
@@ -21,7 +21,7 @@
 
 **Target User:** Developers who do daily development with Claude Code, working terminal-focused.
 
-**What Frame is NOT:**
+**What Atlas is NOT:**
 - Not a code editor (there's a file editor but it's not central)
 - Not a VS Code/Cursor alternative
 - Not optimized for writing code manually
@@ -31,7 +31,7 @@
 ## Project Summary
 IDE-style desktop application for Claude Code. Features a 3-panel layout with project explorer, multi-terminal support (tabs/grid), file editor, and prompt history.
 
-**App Name:** Frame (formerly Claude Code IDE)
+**App Name:** Atlas (formerly Claude Code IDE)
 
 ---
 
@@ -356,7 +356,7 @@ mainWindow.webContents.openDevTools();
 - Auto-documentation (SESSION_LOG.md, DECISIONS.md)
 - Claude API integration for context optimization
 - Session timeline view
-- **Frame Server (Web App mode)** - Run Frame on headless server, access via browser (like code-server)
+- **Atlas Server (Web App mode)** - Run Atlas on headless server, access via browser (like code-server)
 
 ---
 
@@ -382,7 +382,7 @@ mainWindow.webContents.openDevTools();
 
 **Project Start:** 2026-01-21
 **Last Updated:** 2026-01-30
-**Status:** Frame System + Task Management + GitHub Panel Complete
+**Status:** Atlas System + Task Management + GitHub Panel Complete
 
 ---
 
@@ -456,13 +456,13 @@ fi
 
 ---
 
-### [2026-01-26] Frame Vision & Context Preservation Feature
+### [2026-01-26] Atlas Vision & Context Preservation Feature
 
 **User's explanation:**
 
-> "My problem was this, yes I can develop with claude code. but I only stay in the terminal. I don't feel the need to use a platform like vs code or cursor. because those are tools designed for writing code manually. I don't need such complexity. I need standardization and manageability for my projects. I'm terminal and claude code focused. that's why frame's center is not a code editor, but a terminal, we even have a multi-terminal structure with grid. That's why the name is Frame. this is a framework, so we create a frame project within frame, we create these documents to set a standard. so that I can see the projects I develop with claude code in an organized way. so I don't lose context, I note down what's written in sessions."
+> "My problem was this, yes I can develop with claude code. but I only stay in the terminal. I don't feel the need to use a platform like vs code or cursor. because those are tools designed for writing code manually. I don't need such complexity. I need standardization and manageability for my projects. I'm terminal and claude code focused. that's why frame's center is not a code editor, but a terminal, we even have a multi-terminal structure with grid. That's why the name is Atlas. this is a framework, so we create a frame project within frame, we create these documents to set a standard. so that I can see the projects I develop with claude code in an organized way. so I don't lose context, I note down what's written in sessions."
 
-**Frame's True Purpose:**
+**Atlas's True Purpose:**
 - Terminal-centric (not a code editor)
 - Claude Code-native development
 - Standardization across projects
@@ -520,7 +520,7 @@ The user warned: "actually everything you deleted in the claude.md file was impo
 
 ---
 
-### [2026-01-30] Frame Server Feature Request (Web App Mode)
+### [2026-01-30] Atlas Server Feature Request (Web App Mode)
 
 **Context:** GitHub issue request - user has Windows PC for display and headless Debian machine for development.
 
@@ -528,14 +528,14 @@ The user warned: "actually everything you deleted in the claude.md file was impo
 > "I have this requirement too. I have a Windows PC that I want to run this on, but my development machine is a headless debian machine. Come to think of it, exposing it as a web app (like code-server) would be useful too - then I can install this on my headless linux dev box and open it on any browser anywhere and start working. Should be doable since this is electron based, no?"
 
 **Analysis:**
-- Frame is Electron-based (Chromium + Node.js) - already web technologies
+- Atlas is Electron-based (Chromium + Node.js) - already web technologies
 - xterm.js is web-native, works in browser
 - Main change needed: IPC → WebSocket communication
 - Pattern proven by code-server (VS Code in browser)
 
 **Proposed Architecture:**
 ```
-Electron App                    Web App (Frame Server)
+Electron App                    Web App (Atlas Server)
 ─────────────                   ─────────────────────
 ipcMain/ipcRenderer    →        Express + WebSocket
 Electron window        →        Static HTML server
@@ -543,4 +543,4 @@ node-pty (same)                 node-pty (same)
 xterm.js (same)                 xterm.js (same)
 ```
 
-**Decision:** Added to roadmap as "Frame Server" - will consider for future development based on community interest.
+**Decision:** Added to roadmap as "Atlas Server" - will consider for future development based on community interest.
