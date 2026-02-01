@@ -104,8 +104,8 @@ async function showInitializeConfirmation(projectPath) {
     buttons: ['Cancel', 'Initialize'],
     defaultId: 0,
     cancelId: 0,
-    title: 'Initialize as Frame Project',
-    message: 'Initialize as Frame Project?',
+    title: 'Initialize as Atlas Project',
+    message: 'Initialize as Atlas Project?',
     detail: message
   });
 

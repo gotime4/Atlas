@@ -876,44 +876,44 @@
           "purpose": "Render file tree recursively"
         },
         "clearFileTree": {
-          "line": 129,
+          "line": 139,
           "purpose": "Clear file tree"
         },
         "refreshFileTree": {
-          "line": 138,
+          "line": 148,
           "params": [
             "projectPath"
           ],
           "purpose": "Refresh file tree"
         },
         "loadFileTree": {
-          "line": 148,
+          "line": 158,
           "params": [
             "projectPath"
           ],
           "purpose": "Load file tree for path"
         },
         "setupIPC": {
-          "line": 155,
+          "line": 165,
           "purpose": "Setup IPC listeners"
         },
         "focus": {
-          "line": 165,
+          "line": 175,
           "purpose": "Focus file tree for keyboard navigation"
         },
         "getVisibleItems": {
-          "line": 193,
+          "line": 203,
           "purpose": "Get all visible file items (for navigation)"
         },
         "handleKeydown": {
-          "line": 212,
+          "line": 222,
           "params": [
             "e"
           ],
           "purpose": "Handle keyboard navigation in file tree"
         },
         "blur": {
-          "line": 274,
+          "line": 284,
           "purpose": "Blur/unfocus file tree"
         }
       },

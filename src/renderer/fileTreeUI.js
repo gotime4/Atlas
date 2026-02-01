@@ -86,33 +86,43 @@ function renderFileTree(files, parentElement, indent = 0) {
     fileItem.appendChild(name);
     wrapper.appendChild(fileItem);
 
-    // Create children container for folders
-    if (file.isDirectory && file.children && file.children.length > 0) {
-      const childrenContainer = document.createElement('div');
-      childrenContainer.className = 'folder-children';
-      childrenContainer.style.display = 'none'; // Start collapsed
+    // Handle folder clicks
+    if (file.isDirectory) {
+      // Create children container if folder has children
+      let childrenContainer = null;
+      if (file.children && file.children.length > 0) {
+        childrenContainer = document.createElement('div');
+        childrenContainer.className = 'folder-children';
+        childrenContainer.style.display = 'none'; // Start collapsed
 
-      // Recursively render children
-      renderFileTree(file.children, childrenContainer, indent + 1);
-      wrapper.appendChild(childrenContainer);
+        // Recursively render children
+        renderFileTree(file.children, childrenContainer, indent + 1);
+        wrapper.appendChild(childrenContainer);
+      }
 
-      // Toggle folder on click
+      // Toggle folder on click (works for both empty and non-empty folders)
       fileItem.addEventListener('click', (e) => {
         e.stopPropagation();
-        const arrow = fileItem.querySelector('.folder-arrow');
-        const isExpanded = childrenContainer.style.display !== 'none';
+        e.preventDefault();
 
-        if (isExpanded) {
-          childrenContainer.style.display = 'none';
-          arrow.style.transform = 'rotate(0deg)';
-        } else {
-          childrenContainer.style.display = 'block';
-          arrow.style.transform = 'rotate(90deg)';
+        const arrow = fileItem.querySelector('.folder-arrow');
+
+        if (childrenContainer) {
+          const isExpanded = childrenContainer.style.display !== 'none';
+
+          if (isExpanded) {
+            childrenContainer.style.display = 'none';
+            if (arrow) arrow.style.transform = 'rotate(0deg)';
+          } else {
+            childrenContainer.style.display = 'block';
+            if (arrow) arrow.style.transform = 'rotate(90deg)';
+          }
         }
       });
-    } else if (!file.isDirectory) {
+    } else {
       // File click handler - open in editor
-      fileItem.addEventListener('click', () => {
+      fileItem.addEventListener('click', (e) => {
+        e.stopPropagation();
         if (onFileClickCallback) {
           onFileClickCallback(file.path, 'fileTree');
         }
