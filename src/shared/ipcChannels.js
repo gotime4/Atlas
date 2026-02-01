@@ -83,6 +83,8 @@ const IPC = {
   GITHUB_ISSUES_DATA: 'github-issues-data',
   TOGGLE_GITHUB_PANEL: 'toggle-github-panel',
   OPEN_GITHUB_ISSUE: 'open-github-issue',
+  LOAD_GITHUB_PRS: 'load-github-prs',
+  GITHUB_PRS_DATA: 'github-prs-data',
 
   // Settings & Themes
   LOAD_SETTINGS: 'load-settings',

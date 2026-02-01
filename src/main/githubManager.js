@@ -88,7 +88,40 @@ async function loadIssues(projectPath, state = 'open') {
 }
 
 /**
- * Open issue in browser
+ * Load GitHub pull requests for current project
+ */
+async function loadPullRequests(projectPath, state = 'open') {
+  const ghAvailable = await checkGhCli();
+  if (!ghAvailable) {
+    return { error: 'gh CLI not installed', prs: [] };
+  }
+
+  const repoInfo = await checkGitHubRepo(projectPath);
+  if (!repoInfo.isGitHubRepo) {
+    return { error: 'Not a GitHub repository', prs: [] };
+  }
+
+  return new Promise((resolve) => {
+    // Get PRs with status check information
+    const cmd = `gh pr list --state ${state} --json number,title,state,author,labels,createdAt,updatedAt,url,headRefName,baseRefName,isDraft,mergeable,reviewDecision,statusCheckRollup --limit 50`;
+
+    exec(cmd, { cwd: projectPath }, (error, stdout, stderr) => {
+      if (error) {
+        resolve({ error: stderr || error.message, prs: [], repoName: repoInfo.repoName });
+      } else {
+        try {
+          const prs = JSON.parse(stdout);
+          resolve({ error: null, prs, repoName: repoInfo.repoName });
+        } catch (e) {
+          resolve({ error: 'Failed to parse pull requests', prs: [], repoName: repoInfo.repoName });
+        }
+      }
+    });
+  });
+}
+
+/**
+ * Open issue/PR in browser
  */
 function openIssue(url) {
   if (url) {
@@ -109,7 +142,16 @@ function setupIPC(ipcMain) {
     return await loadIssues(path, state);
   });
 
-  // Open issue in browser
+  // Load pull requests
+  ipcMain.handle(IPC.LOAD_GITHUB_PRS, async (event, { projectPath, state }) => {
+    const path = projectPath || currentProjectPath;
+    if (!path) {
+      return { error: 'No project selected', prs: [] };
+    }
+    return await loadPullRequests(path, state);
+  });
+
+  // Open issue/PR in browser
   ipcMain.on(IPC.OPEN_GITHUB_ISSUE, (event, url) => {
     openIssue(url);
   });

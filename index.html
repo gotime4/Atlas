@@ -2712,6 +2712,175 @@
       color: var(--text-muted);
     }
 
+    /* GitHub PR Item */
+    .github-pr-item {
+      display: flex;
+      align-items: flex-start;
+      gap: var(--space-sm);
+      padding: var(--space-md);
+      background: var(--bg-tertiary);
+      border-radius: var(--radius-md);
+      border: 1px solid var(--border-subtle);
+      margin-bottom: var(--space-sm);
+      cursor: pointer;
+      transition: all var(--transition-fast);
+    }
+
+    .github-pr-item:hover {
+      border-color: var(--border-default);
+      background: var(--bg-elevated);
+    }
+
+    .github-pr-state {
+      width: 20px;
+      height: 20px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      margin-top: 2px;
+    }
+
+    .github-pr-state.open {
+      color: var(--success);
+    }
+
+    .github-pr-state.merged {
+      color: #8b5cf6;
+    }
+
+    .github-pr-state.closed {
+      color: var(--error);
+    }
+
+    .github-pr-content {
+      flex: 1;
+      min-width: 0;
+    }
+
+    .github-pr-header {
+      display: flex;
+      align-items: baseline;
+      gap: var(--space-sm);
+      margin-bottom: var(--space-xs);
+      flex-wrap: wrap;
+    }
+
+    .github-pr-number {
+      font-size: 12px;
+      color: var(--text-tertiary);
+      font-family: var(--font-mono);
+    }
+
+    .github-pr-title {
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--text-primary);
+      line-height: 1.4;
+    }
+
+    .github-pr-draft {
+      font-size: 10px;
+      background: var(--bg-hover);
+      color: var(--text-tertiary);
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-weight: 500;
+    }
+
+    .github-pr-branch {
+      display: flex;
+      align-items: center;
+      gap: var(--space-xs);
+      margin-bottom: var(--space-sm);
+      font-size: 11px;
+    }
+
+    .github-pr-branch-name {
+      font-family: var(--font-mono);
+      background: var(--bg-deep);
+      color: var(--info);
+      padding: 2px 6px;
+      border-radius: 4px;
+      max-width: 120px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .github-pr-arrow {
+      color: var(--text-muted);
+    }
+
+    .github-pr-badges {
+      display: flex;
+      flex-wrap: wrap;
+      gap: var(--space-xs);
+      margin-bottom: var(--space-sm);
+    }
+
+    .github-pr-status {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      font-size: 10px;
+      padding: 2px 8px;
+      border-radius: 10px;
+      font-weight: 500;
+    }
+
+    .github-pr-status.status-success {
+      background: rgba(74, 222, 128, 0.15);
+      color: var(--success);
+    }
+
+    .github-pr-status.status-failure {
+      background: rgba(248, 113, 113, 0.15);
+      color: var(--error);
+    }
+
+    .github-pr-status.status-pending {
+      background: rgba(251, 191, 36, 0.15);
+      color: var(--warning);
+    }
+
+    .github-pr-review {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      font-size: 10px;
+      padding: 2px 8px;
+      border-radius: 10px;
+      font-weight: 500;
+    }
+
+    .github-pr-review.approved {
+      background: rgba(74, 222, 128, 0.15);
+      color: var(--success);
+    }
+
+    .github-pr-review.changes-requested {
+      background: rgba(248, 113, 113, 0.15);
+      color: var(--error);
+    }
+
+    .github-pr-review.review-required {
+      background: rgba(251, 191, 36, 0.15);
+      color: var(--warning);
+    }
+
+    .github-pr-labels {
+      display: flex;
+      flex-wrap: wrap;
+      gap: var(--space-xs);
+      margin-bottom: var(--space-sm);
+    }
+
+    .github-pr-meta {
+      font-size: 11px;
+      color: var(--text-muted);
+    }
+
     /* GitHub Empty State */
     .github-empty,
     .github-error,

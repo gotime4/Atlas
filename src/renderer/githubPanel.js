@@ -8,7 +8,8 @@ const { IPC } = require('../shared/ipcChannels');
 
 let isVisible = false;
 let issuesData = [];
-let currentTab = 'issues'; // issues, prs, actions (future)
+let prsData = [];
+let currentTab = 'issues'; // issues, prs, actions
 let currentFilter = 'open'; // open, closed, all
 let repoName = null;
 
@@ -114,7 +115,40 @@ async function loadIssues() {
 }
 
 /**
- * Refresh issues
+ * Load GitHub pull requests
+ */
+async function loadPullRequests() {
+  const state = require('./state');
+  const projectPath = state.getProjectPath();
+
+  if (!projectPath) {
+    renderError('No project selected');
+    return;
+  }
+
+  renderLoading('pull requests');
+
+  try {
+    const result = await ipcRenderer.invoke(IPC.LOAD_GITHUB_PRS, {
+      projectPath,
+      state: currentFilter
+    });
+
+    if (result.error) {
+      renderError(result.error);
+    } else {
+      prsData = result.prs;
+      repoName = result.repoName;
+      renderPullRequests();
+    }
+  } catch (err) {
+    console.error('Error loading pull requests:', err);
+    renderError('Failed to load pull requests');
+  }
+}
+
+/**
+ * Refresh issues/PRs
  */
 async function refreshIssues() {
   const refreshBtn = document.getElementById('github-refresh-btn');
@@ -125,8 +159,13 @@ async function refreshIssues() {
       refreshBtn.disabled = true;
     }
 
-    await loadIssues();
-    showToast('Issues refreshed', 'success');
+    if (currentTab === 'issues') {
+      await loadIssues();
+      showToast('Issues refreshed', 'success');
+    } else if (currentTab === 'prs') {
+      await loadPullRequests();
+      showToast('Pull requests refreshed', 'success');
+    }
   } finally {
     if (refreshBtn) {
       refreshBtn.classList.remove('spinning');
@@ -178,9 +217,10 @@ function setTab(tab) {
     btn.classList.toggle('active', btn.dataset.tab === tab);
   });
 
-  // For now, only issues tab is implemented
   if (tab === 'issues') {
     loadIssues();
+  } else if (tab === 'prs') {
+    loadPullRequests();
   } else {
     renderComingSoon(tab);
   }
@@ -203,13 +243,13 @@ function setFilter(filter) {
 /**
  * Render loading state
  */
-function renderLoading() {
+function renderLoading(type = 'issues') {
   if (!contentElement) return;
 
   contentElement.innerHTML = `
     <div class="github-loading">
       <div class="github-loading-spinner"></div>
-      <p>Loading issues...</p>
+      <p>Loading ${type}...</p>
     </div>
   `;
 }
@@ -346,6 +386,188 @@ function renderIssueItem(issue) {
       </div>
     </div>
   `;
+}
+
+/**
+ * Render pull requests list
+ */
+function renderPullRequests() {
+  if (!contentElement) return;
+
+  // Update repo name in header
+  const repoNameEl = document.getElementById('github-repo-name');
+  if (repoNameEl) {
+    repoNameEl.textContent = repoName || '';
+    repoNameEl.style.display = repoName ? 'block' : 'none';
+  }
+
+  if (!prsData || prsData.length === 0) {
+    contentElement.innerHTML = `
+      <div class="github-empty">
+        <div class="github-empty-icon">
+          <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+            <circle cx="12" cy="12" r="10"/>
+            <line x1="8" y1="12" x2="16" y2="12"/>
+          </svg>
+        </div>
+        <p>No ${currentFilter} pull requests</p>
+        <span>${currentFilter === 'open' ? 'All PRs are merged or closed!' : 'No PRs found with this filter'}</span>
+      </div>
+    `;
+    return;
+  }
+
+  contentElement.innerHTML = prsData.map(pr => renderPRItem(pr)).join('');
+
+  // Add event listeners to PR items
+  contentElement.querySelectorAll('.github-pr-item').forEach(item => {
+    item.addEventListener('click', () => {
+      const url = item.dataset.url;
+      if (url) {
+        ipcRenderer.send(IPC.OPEN_GITHUB_ISSUE, url);
+      }
+    });
+  });
+}
+
+/**
+ * Render single pull request item
+ */
+function renderPRItem(pr) {
+  const stateClass = pr.state === 'OPEN' ? 'open' : (pr.state === 'MERGED' ? 'merged' : 'closed');
+
+  // PR state icon
+  let stateIcon;
+  if (pr.state === 'MERGED') {
+    stateIcon = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="18" cy="18" r="3"/><circle cx="6" cy="6" r="3"/><path d="M6 9v6a3 3 0 0 0 3 3h6"/></svg>';
+  } else if (pr.state === 'OPEN') {
+    stateIcon = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="18" cy="18" r="3"/><circle cx="6" cy="6" r="3"/><path d="M6 9v12"/><path d="M18 9a9 9 0 0 0-9 9"/></svg>';
+  } else {
+    stateIcon = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>';
+  }
+
+  // CI/CD Status
+  const statusInfo = getPRStatus(pr);
+  const statusBadge = statusInfo ? `
+    <span class="github-pr-status ${statusInfo.class}" title="${statusInfo.title}">
+      ${statusInfo.icon}
+      <span>${statusInfo.text}</span>
+    </span>
+  ` : '';
+
+  // Review status
+  const reviewBadge = getReviewBadge(pr.reviewDecision);
+
+  // Draft badge
+  const draftBadge = pr.isDraft ? '<span class="github-pr-draft">Draft</span>' : '';
+
+  // Labels
+  const labels = pr.labels && pr.labels.length > 0
+    ? pr.labels.map(label => {
+        const bgColor = label.color ? `#${label.color}` : 'var(--bg-hover)';
+        const textColor = label.color ? getContrastColor(label.color) : 'var(--text-secondary)';
+        return `<span class="github-label" style="background: ${bgColor}; color: ${textColor}">${escapeHtml(label.name)}</span>`;
+      }).join('')
+    : '';
+
+  const createdAt = formatRelativeTime(pr.createdAt);
+  const author = pr.author ? pr.author.login : 'unknown';
+
+  return `
+    <div class="github-pr-item ${stateClass}" data-url="${escapeHtml(pr.url)}">
+      <div class="github-pr-state ${stateClass}">
+        ${stateIcon}
+      </div>
+      <div class="github-pr-content">
+        <div class="github-pr-header">
+          <span class="github-pr-number">#${pr.number}</span>
+          <span class="github-pr-title">${escapeHtml(pr.title)}</span>
+          ${draftBadge}
+        </div>
+        <div class="github-pr-branch">
+          <span class="github-pr-branch-name">${escapeHtml(pr.headRefName)}</span>
+          <span class="github-pr-arrow">→</span>
+          <span class="github-pr-branch-name">${escapeHtml(pr.baseRefName)}</span>
+        </div>
+        <div class="github-pr-badges">
+          ${statusBadge}
+          ${reviewBadge}
+        </div>
+        ${labels ? `<div class="github-pr-labels">${labels}</div>` : ''}
+        <div class="github-pr-meta">
+          <span>opened ${createdAt} by ${escapeHtml(author)}</span>
+        </div>
+      </div>
+    </div>
+  `;
+}
+
+/**
+ * Get PR CI/CD status from statusCheckRollup
+ */
+function getPRStatus(pr) {
+  if (!pr.statusCheckRollup || pr.statusCheckRollup.length === 0) {
+    return null;
+  }
+
+  // Count status states
+  let pending = 0, success = 0, failure = 0;
+
+  for (const check of pr.statusCheckRollup) {
+    const state = check.status || check.state || check.conclusion;
+    if (state === 'SUCCESS' || state === 'COMPLETED' || state === 'success') {
+      success++;
+    } else if (state === 'FAILURE' || state === 'ERROR' || state === 'failure' || state === 'error' || state === 'TIMED_OUT') {
+      failure++;
+    } else if (state === 'PENDING' || state === 'IN_PROGRESS' || state === 'QUEUED' || state === 'pending') {
+      pending++;
+    }
+  }
+
+  const total = pr.statusCheckRollup.length;
+
+  if (failure > 0) {
+    return {
+      class: 'status-failure',
+      icon: '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>',
+      text: `${failure}/${total} failed`,
+      title: `${failure} checks failed, ${success} passed, ${pending} pending`
+    };
+  } else if (pending > 0) {
+    return {
+      class: 'status-pending',
+      icon: '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>',
+      text: `${pending} running`,
+      title: `${pending} checks running, ${success} passed`
+    };
+  } else if (success > 0) {
+    return {
+      class: 'status-success',
+      icon: '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>',
+      text: `${success}/${total} passed`,
+      title: `All ${total} checks passed`
+    };
+  }
+
+  return null;
+}
+
+/**
+ * Get review decision badge
+ */
+function getReviewBadge(reviewDecision) {
+  if (!reviewDecision) return '';
+
+  switch (reviewDecision) {
+    case 'APPROVED':
+      return '<span class="github-pr-review approved" title="Approved"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg> Approved</span>';
+    case 'CHANGES_REQUESTED':
+      return '<span class="github-pr-review changes-requested" title="Changes requested"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 9v4"/><path d="M12 17h.01"/></svg> Changes requested</span>';
+    case 'REVIEW_REQUIRED':
+      return '<span class="github-pr-review review-required" title="Review required"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 16v.01"/><path d="M12 12v-4"/></svg> Review required</span>';
+    default:
+      return '';
+  }
 }
 
 /**
