@@ -121,7 +121,44 @@ async function loadPullRequests(projectPath, state = 'open') {
 }
 
 /**
- * Open issue/PR in browser
+ * Load GitHub Actions workflow runs
+ */
+async function loadActions(projectPath, status = '') {
+  const ghAvailable = await checkGhCli();
+  if (!ghAvailable) {
+    return { error: 'gh CLI not installed', runs: [] };
+  }
+
+  const repoInfo = await checkGitHubRepo(projectPath);
+  if (!repoInfo.isGitHubRepo) {
+    return { error: 'Not a GitHub repository', runs: [] };
+  }
+
+  return new Promise((resolve) => {
+    // Get workflow runs with status filter
+    let cmd = 'gh run list --json databaseId,displayTitle,name,status,conclusion,event,headBranch,createdAt,updatedAt,url,workflowName --limit 30';
+
+    if (status && status !== 'all') {
+      cmd += ` --status ${status}`;
+    }
+
+    exec(cmd, { cwd: projectPath }, (error, stdout, stderr) => {
+      if (error) {
+        resolve({ error: stderr || error.message, runs: [], repoName: repoInfo.repoName });
+      } else {
+        try {
+          const runs = JSON.parse(stdout);
+          resolve({ error: null, runs, repoName: repoInfo.repoName });
+        } catch (e) {
+          resolve({ error: 'Failed to parse workflow runs', runs: [], repoName: repoInfo.repoName });
+        }
+      }
+    });
+  });
+}
+
+/**
+ * Open issue/PR/action in browser
  */
 function openIssue(url) {
   if (url) {
@@ -151,7 +188,16 @@ function setupIPC(ipcMain) {
     return await loadPullRequests(path, state);
   });
 
-  // Open issue/PR in browser
+  // Load GitHub Actions
+  ipcMain.handle(IPC.LOAD_GITHUB_ACTIONS, async (event, { projectPath, status }) => {
+    const path = projectPath || currentProjectPath;
+    if (!path) {
+      return { error: 'No project selected', runs: [] };
+    }
+    return await loadActions(path, status);
+  });
+
+  // Open issue/PR/action in browser
   ipcMain.on(IPC.OPEN_GITHUB_ISSUE, (event, url) => {
     openIssue(url);
   });

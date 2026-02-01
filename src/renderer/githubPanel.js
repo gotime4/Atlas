@@ -9,8 +9,10 @@ const { IPC } = require('../shared/ipcChannels');
 let isVisible = false;
 let issuesData = [];
 let prsData = [];
+let actionsData = [];
 let currentTab = 'issues'; // issues, prs, actions
 let currentFilter = 'open'; // open, closed, all
+let currentActionsFilter = 'all'; // all, completed, in_progress, queued, failure
 let repoName = null;
 
 // DOM Elements
@@ -148,7 +150,40 @@ async function loadPullRequests() {
 }
 
 /**
- * Refresh issues/PRs
+ * Load GitHub Actions workflow runs
+ */
+async function loadActions() {
+  const state = require('./state');
+  const projectPath = state.getProjectPath();
+
+  if (!projectPath) {
+    renderError('No project selected');
+    return;
+  }
+
+  renderLoading('workflow runs');
+
+  try {
+    const result = await ipcRenderer.invoke(IPC.LOAD_GITHUB_ACTIONS, {
+      projectPath,
+      status: currentActionsFilter === 'all' ? '' : currentActionsFilter
+    });
+
+    if (result.error) {
+      renderError(result.error);
+    } else {
+      actionsData = result.runs;
+      repoName = result.repoName;
+      renderActions();
+    }
+  } catch (err) {
+    console.error('Error loading actions:', err);
+    renderError('Failed to load workflow runs');
+  }
+}
+
+/**
+ * Refresh issues/PRs/actions
  */
 async function refreshIssues() {
   const refreshBtn = document.getElementById('github-refresh-btn');
@@ -165,6 +200,9 @@ async function refreshIssues() {
     } else if (currentTab === 'prs') {
       await loadPullRequests();
       showToast('Pull requests refreshed', 'success');
+    } else if (currentTab === 'actions') {
+      await loadActions();
+      showToast('Workflow runs refreshed', 'success');
     }
   } finally {
     if (refreshBtn) {
@@ -217,27 +255,73 @@ function setTab(tab) {
     btn.classList.toggle('active', btn.dataset.tab === tab);
   });
 
+  // Update filter buttons visibility based on tab
+  updateFilterButtons(tab);
+
   if (tab === 'issues') {
     loadIssues();
   } else if (tab === 'prs') {
     loadPullRequests();
+  } else if (tab === 'actions') {
+    loadActions();
   } else {
     renderComingSoon(tab);
   }
 }
 
 /**
+ * Update filter buttons based on current tab
+ */
+function updateFilterButtons(tab) {
+  const filterContainer = document.querySelector('.github-filters');
+  if (!filterContainer) return;
+
+  if (tab === 'actions') {
+    // Show actions-specific filters
+    filterContainer.innerHTML = `
+      <button class="github-filter-btn ${currentActionsFilter === 'all' ? 'active' : ''}" data-filter="all">All</button>
+      <button class="github-filter-btn ${currentActionsFilter === 'in_progress' ? 'active' : ''}" data-filter="in_progress">Running</button>
+      <button class="github-filter-btn ${currentActionsFilter === 'completed' ? 'active' : ''}" data-filter="completed">Completed</button>
+      <button class="github-filter-btn ${currentActionsFilter === 'failure' ? 'active' : ''}" data-filter="failure">Failed</button>
+    `;
+  } else {
+    // Show standard open/closed/all filters
+    filterContainer.innerHTML = `
+      <button class="github-filter-btn ${currentFilter === 'open' ? 'active' : ''}" data-filter="open">Open</button>
+      <button class="github-filter-btn ${currentFilter === 'closed' ? 'active' : ''}" data-filter="closed">Closed</button>
+      <button class="github-filter-btn ${currentFilter === 'all' ? 'active' : ''}" data-filter="all">All</button>
+    `;
+  }
+
+  // Re-attach event listeners
+  filterContainer.querySelectorAll('.github-filter-btn').forEach(btn => {
+    btn.addEventListener('click', (e) => {
+      const filter = e.target.dataset.filter;
+      setFilter(filter);
+    });
+  });
+}
+
+/**
  * Set filter
  */
 function setFilter(filter) {
-  currentFilter = filter;
-
   // Update active filter button
   document.querySelectorAll('.github-filter-btn').forEach(btn => {
     btn.classList.toggle('active', btn.dataset.filter === filter);
   });
 
-  loadIssues();
+  if (currentTab === 'actions') {
+    currentActionsFilter = filter;
+    loadActions();
+  } else {
+    currentFilter = filter;
+    if (currentTab === 'issues') {
+      loadIssues();
+    } else if (currentTab === 'prs') {
+      loadPullRequests();
+    }
+  }
 }
 
 /**
@@ -500,6 +584,170 @@ function renderPRItem(pr) {
       </div>
     </div>
   `;
+}
+
+/**
+ * Render GitHub Actions workflow runs
+ */
+function renderActions() {
+  if (!contentElement) return;
+
+  // Update repo name in header
+  const repoNameEl = document.getElementById('github-repo-name');
+  if (repoNameEl) {
+    repoNameEl.textContent = repoName || '';
+    repoNameEl.style.display = repoName ? 'block' : 'none';
+  }
+
+  if (!actionsData || actionsData.length === 0) {
+    contentElement.innerHTML = `
+      <div class="github-empty">
+        <div class="github-empty-icon">
+          <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+            <circle cx="12" cy="12" r="10"/>
+            <line x1="8" y1="12" x2="16" y2="12"/>
+          </svg>
+        </div>
+        <p>No workflow runs found</p>
+        <span>${currentActionsFilter === 'all' ? 'No GitHub Actions have been run yet' : 'No runs match this filter'}</span>
+      </div>
+    `;
+    return;
+  }
+
+  contentElement.innerHTML = actionsData.map(run => renderActionItem(run)).join('');
+
+  // Add event listeners to action items
+  contentElement.querySelectorAll('.github-action-item').forEach(item => {
+    item.addEventListener('click', () => {
+      const url = item.dataset.url;
+      if (url) {
+        ipcRenderer.send(IPC.OPEN_GITHUB_ISSUE, url);
+      }
+    });
+  });
+}
+
+/**
+ * Render single action/workflow run item
+ */
+function renderActionItem(run) {
+  const statusInfo = getActionStatus(run);
+
+  // Event icon
+  const eventIcon = getEventIcon(run.event);
+
+  const createdAt = formatRelativeTime(run.createdAt);
+
+  return `
+    <div class="github-action-item ${statusInfo.class}" data-url="${escapeHtml(run.url)}">
+      <div class="github-action-status ${statusInfo.class}">
+        ${statusInfo.icon}
+      </div>
+      <div class="github-action-content">
+        <div class="github-action-header">
+          <span class="github-action-title">${escapeHtml(run.displayTitle || run.name)}</span>
+        </div>
+        <div class="github-action-workflow">
+          <span class="github-action-workflow-name">${escapeHtml(run.workflowName)}</span>
+        </div>
+        <div class="github-action-meta">
+          <span class="github-action-event" title="Trigger: ${run.event}">
+            ${eventIcon}
+            ${escapeHtml(run.event)}
+          </span>
+          <span class="github-action-branch" title="Branch: ${run.headBranch}">
+            <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <line x1="6" y1="3" x2="6" y2="15"/>
+              <circle cx="18" cy="6" r="3"/>
+              <circle cx="6" cy="18" r="3"/>
+              <path d="M18 9a9 9 0 0 1-9 9"/>
+            </svg>
+            ${escapeHtml(run.headBranch)}
+          </span>
+          <span class="github-action-time">${createdAt}</span>
+        </div>
+      </div>
+      <div class="github-action-badge ${statusInfo.class}">
+        ${statusInfo.text}
+      </div>
+    </div>
+  `;
+}
+
+/**
+ * Get action/workflow run status
+ */
+function getActionStatus(run) {
+  const status = run.status;
+  const conclusion = run.conclusion;
+
+  if (status === 'in_progress' || status === 'queued' || status === 'pending' || status === 'waiting') {
+    return {
+      class: 'running',
+      icon: '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="spin"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>',
+      text: status === 'queued' ? 'Queued' : 'Running'
+    };
+  }
+
+  if (conclusion === 'success') {
+    return {
+      class: 'success',
+      icon: '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="8 12 11 15 16 9"/></svg>',
+      text: 'Success'
+    };
+  }
+
+  if (conclusion === 'failure') {
+    return {
+      class: 'failure',
+      icon: '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>',
+      text: 'Failed'
+    };
+  }
+
+  if (conclusion === 'cancelled') {
+    return {
+      class: 'cancelled',
+      icon: '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><rect x="9" y="9" width="6" height="6"/></svg>',
+      text: 'Cancelled'
+    };
+  }
+
+  if (conclusion === 'skipped') {
+    return {
+      class: 'skipped',
+      icon: '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M10 8l6 4-6 4V8z"/></svg>',
+      text: 'Skipped'
+    };
+  }
+
+  return {
+    class: 'neutral',
+    icon: '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>',
+    text: status || 'Unknown'
+  };
+}
+
+/**
+ * Get event icon for workflow trigger
+ */
+function getEventIcon(event) {
+  switch (event) {
+    case 'push':
+      return '<svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 19V5M5 12l7-7 7 7"/></svg>';
+    case 'pull_request':
+    case 'pull_request_target':
+      return '<svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="18" cy="18" r="3"/><circle cx="6" cy="6" r="3"/><path d="M6 9v12"/><path d="M18 9a9 9 0 0 0-9 9"/></svg>';
+    case 'schedule':
+      return '<svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>';
+    case 'workflow_dispatch':
+      return '<svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"/></svg>';
+    case 'release':
+      return '<svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"/><line x1="7" y1="7" x2="7.01" y2="7"/></svg>';
+    default:
+      return '<svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/></svg>';
+  }
 }
 
 /**

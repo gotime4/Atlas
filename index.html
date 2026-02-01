@@ -2881,6 +2881,162 @@
       color: var(--text-muted);
     }
 
+    /* GitHub Action Item */
+    .github-action-item {
+      display: flex;
+      align-items: flex-start;
+      gap: var(--space-sm);
+      padding: var(--space-md);
+      background: var(--bg-tertiary);
+      border-radius: var(--radius-md);
+      border: 1px solid var(--border-subtle);
+      margin-bottom: var(--space-sm);
+      cursor: pointer;
+      transition: all var(--transition-fast);
+    }
+
+    .github-action-item:hover {
+      border-color: var(--border-default);
+      background: var(--bg-elevated);
+    }
+
+    .github-action-status {
+      width: 24px;
+      height: 24px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      margin-top: 2px;
+    }
+
+    .github-action-status.success {
+      color: var(--success);
+    }
+
+    .github-action-status.failure {
+      color: var(--error);
+    }
+
+    .github-action-status.running {
+      color: var(--warning);
+    }
+
+    .github-action-status.cancelled {
+      color: var(--text-muted);
+    }
+
+    .github-action-status.skipped {
+      color: var(--text-tertiary);
+    }
+
+    .github-action-status.neutral {
+      color: var(--text-secondary);
+    }
+
+    .github-action-status .spin {
+      animation: spin 1s linear infinite;
+    }
+
+    .github-action-content {
+      flex: 1;
+      min-width: 0;
+    }
+
+    .github-action-header {
+      margin-bottom: var(--space-xs);
+    }
+
+    .github-action-title {
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--text-primary);
+      line-height: 1.4;
+      display: block;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .github-action-workflow {
+      margin-bottom: var(--space-sm);
+    }
+
+    .github-action-workflow-name {
+      font-size: 11px;
+      color: var(--text-secondary);
+      font-family: var(--font-mono);
+      background: var(--bg-deep);
+      padding: 2px 6px;
+      border-radius: 4px;
+    }
+
+    .github-action-meta {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: var(--space-sm);
+      font-size: 11px;
+      color: var(--text-muted);
+    }
+
+    .github-action-event {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .github-action-branch {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      color: var(--info);
+    }
+
+    .github-action-time {
+      color: var(--text-tertiary);
+    }
+
+    .github-action-badge {
+      font-size: 10px;
+      font-weight: 600;
+      padding: 4px 8px;
+      border-radius: 10px;
+      flex-shrink: 0;
+      text-transform: uppercase;
+      letter-spacing: 0.3px;
+    }
+
+    .github-action-badge.success {
+      background: rgba(74, 222, 128, 0.15);
+      color: var(--success);
+    }
+
+    .github-action-badge.failure {
+      background: rgba(248, 113, 113, 0.15);
+      color: var(--error);
+    }
+
+    .github-action-badge.running {
+      background: rgba(251, 191, 36, 0.15);
+      color: var(--warning);
+    }
+
+    .github-action-badge.cancelled {
+      background: rgba(160, 160, 160, 0.15);
+      color: var(--text-muted);
+    }
+
+    .github-action-badge.skipped {
+      background: rgba(160, 160, 160, 0.1);
+      color: var(--text-tertiary);
+    }
+
+    .github-action-badge.neutral {
+      background: rgba(160, 160, 160, 0.1);
+      color: var(--text-secondary);
+    }
+
     /* GitHub Empty State */
     .github-empty,
     .github-error,

@@ -2211,15 +2211,23 @@
           ],
           "purpose": "Load GitHub pull requests for current project"
         },
-        "openIssue": {
+        "loadActions": {
           "line": 126,
+          "params": [
+            "projectPath",
+            "status = ''"
+          ],
+          "purpose": "Load GitHub Actions workflow runs"
+        },
+        "openIssue": {
+          "line": 163,
           "params": [
             "url"
           ],
-          "purpose": "Open issue/PR in browser"
+          "purpose": "Open issue/PR/action in browser"
         },
         "setupIPC": {
-          "line": 135,
+          "line": 172,
           "params": [
             "ipcMain"
           ],
@@ -2230,6 +2238,7 @@
         "listens": [
           "LOAD_GITHUB_ISSUES",
           "LOAD_GITHUB_PRS",
+          "LOAD_GITHUB_ACTIONS",
           "OPEN_GITHUB_ISSUE"
         ],
         "emits": []
@@ -2253,128 +2262,164 @@
       ],
       "functions": {
         "init": {
-          "line": 23,
+          "line": 25,
           "purpose": "Initialize GitHub panel"
         },
         "setupEventListeners": {
-          "line": 39,
+          "line": 41,
           "purpose": "Setup event listeners"
         },
         "setupIPCListeners": {
-          "line": 78,
+          "line": 80,
           "purpose": "Setup IPC listeners"
         },
         "loadIssues": {
-          "line": 87,
+          "line": 89,
           "purpose": "Load GitHub issues"
         },
         "loadPullRequests": {
-          "line": 120,
+          "line": 122,
           "purpose": "Load GitHub pull requests"
         },
+        "loadActions": {
+          "line": 155,
+          "purpose": "Load GitHub Actions workflow runs"
+        },
         "refreshIssues": {
-          "line": 153,
-          "purpose": "Refresh issues/PRs"
+          "line": 188,
+          "purpose": "Refresh issues/PRs/actions"
         },
         "show": {
-          "line": 180,
+          "line": 218,
           "purpose": "Show GitHub panel"
         },
         "hide": {
-          "line": 191,
+          "line": 229,
           "purpose": "Hide GitHub panel"
         },
         "toggle": {
-          "line": 201,
+          "line": 239,
           "purpose": "Toggle GitHub panel visibility"
         },
         "setTab": {
-          "line": 212,
+          "line": 250,
           "params": [
             "tab"
           ],
           "purpose": "Set active tab"
         },
+        "updateFilterButtons": {
+          "line": 275,
+          "params": [
+            "tab"
+          ],
+          "purpose": "Update filter buttons based on current tab"
+        },
         "setFilter": {
-          "line": 232,
+          "line": 308,
           "params": [
             "filter"
           ],
           "purpose": "Set filter"
         },
         "renderLoading": {
-          "line": 246,
+          "line": 330,
           "params": [
             "type = 'issues'"
           ],
           "purpose": "Render loading state"
         },
         "renderError": {
-          "line": 260,
+          "line": 344,
           "params": [
             "message"
           ],
           "purpose": "Render error state"
         },
         "renderComingSoon": {
-          "line": 288,
+          "line": 372,
           "params": [
             "tab"
           ],
           "purpose": "Render coming soon state for unimplemented tabs"
         },
         "render": {
-          "line": 313,
+          "line": 397,
           "purpose": "Render issues list"
         },
         "renderIssueItem": {
-          "line": 355,
+          "line": 439,
           "params": [
             "issue"
           ],
           "purpose": "Render single issue item"
         },
         "renderPullRequests": {
-          "line": 394,
+          "line": 478,
           "purpose": "Render pull requests list"
         },
         "renderPRItem": {
-          "line": 436,
+          "line": 520,
           "params": [
             "pr"
           ],
           "purpose": "Render single pull request item"
         },
+        "renderActions": {
+          "line": 592,
+          "purpose": "Render GitHub Actions workflow runs"
+        },
+        "renderActionItem": {
+          "line": 634,
+          "params": [
+            "run"
+          ],
+          "purpose": "Render single action/workflow run item"
+        },
+        "getActionStatus": {
+          "line": 681,
+          "params": [
+            "run"
+          ],
+          "purpose": "Get action/workflow run status"
+        },
+        "getEventIcon": {
+          "line": 735,
+          "params": [
+            "event"
+          ],
+          "purpose": "Get event icon for workflow trigger"
+        },
         "getPRStatus": {
-          "line": 508,
+          "line": 756,
           "params": [
             "pr"
           ],
           "purpose": "Get PR CI/CD status from statusCheckRollup"
         },
         "getReviewBadge": {
-          "line": 558,
+          "line": 806,
           "params": [
             "reviewDecision"
           ],
           "purpose": "Get review decision badge"
         },
         "getContrastColor": {
-          "line": 576,
+          "line": 824,
           "params": [
             "hexColor"
           ],
           "purpose": "Get contrasting text color for a background color"
         },
         "formatRelativeTime": {
-          "line": 587,
+          "line": 835,
           "params": [
             "dateString"
           ],
           "purpose": "Format relative time"
         },
         "showToast": {
-          "line": 612,
+          "line": 860,
           "params": [
             "message",
             "type = 'info'"
@@ -2382,14 +2427,14 @@
           "purpose": "Show toast notification"
         },
         "getToastIcon": {
-          "line": 642,
+          "line": 890,
           "params": [
             "type"
           ],
           "purpose": "Get toast icon based on type"
         },
         "escapeHtml": {
-          "line": 656,
+          "line": 904,
           "params": [
             "text"
           ],
@@ -2401,6 +2446,7 @@
           "TOGGLE_GITHUB_PANEL"
         ],
         "emits": [
+          "OPEN_GITHUB_ISSUE",
           "OPEN_GITHUB_ISSUE",
           "OPEN_GITHUB_ISSUE"
         ]
