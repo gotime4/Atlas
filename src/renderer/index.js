@@ -13,6 +13,9 @@ const state = require('./state');
 const projectListUI = require('./projectListUI');
 const editor = require('./editor');
 const sidebarResize = require('./sidebarResize');
+const themesUI = require('./themesUI');
+const templatesPanel = require('./templatesPanel');
+const sessionUI = require('./sessionUI');
 
 /**
  * Initialize all modules
@@ -73,6 +76,25 @@ function init() {
     terminal.fitTerminal();
   });
 
+  // Initialize themes
+  themesUI.init();
+
+  // Initialize templates panel with callback to insert into terminal
+  templatesPanel.init((promptText) => {
+    terminal.writeToTerminal(promptText);
+  });
+
+  // Initialize session management
+  sessionUI.init((session) => {
+    // Restore last active project if available
+    if (session.activeProject) {
+      // Give UI a moment to render before selecting project
+      setTimeout(() => {
+        state.setProjectPath(session.activeProject);
+      }, 200);
+    }
+  });
+
   // Setup state change listeners
   state.onProjectChange((projectPath, previousPath) => {
     if (projectPath) {
@@ -87,6 +109,12 @@ function init() {
       if (tasksPanel.isVisible()) {
         tasksPanel.loadTasks();
       }
+
+      // Save session with active project
+      sessionUI.setActiveProject(projectPath);
+
+      // Refresh git status for the project
+      projectListUI.requestGitStatus(projectPath);
     } else {
       fileTreeUI.clearFileTree();
     }
@@ -98,10 +126,10 @@ function init() {
     projectListUI.loadProjects();
   });
 
-  // Setup Frame initialized listener
+  // Setup Atlas initialized listener
   state.onFrameInitialized((projectPath) => {
-    terminal.writelnToTerminal(`\x1b[1;32m✓ Frame project initialized!\x1b[0m`);
-    terminal.writelnToTerminal(`  Created: .frame/, CLAUDE.md, STRUCTURE.json, PROJECT_NOTES.md, tasks.json, QUICKSTART.md`);
+    terminal.writelnToTerminal(`\x1b[1;32m✓ Atlas project initialized!\x1b[0m`);
+    terminal.writelnToTerminal(`  Created: .atlas/, CLAUDE.md, STRUCTURE.json, PROJECT_NOTES.md, tasks.json, QUICKSTART.md`);
     // Refresh file tree to show new files
     fileTreeUI.refreshFileTree();
     // Load tasks for the new project
@@ -227,7 +255,12 @@ function setupKeyboardShortcuts() {
     // Ctrl/Cmd+T - Toggle tasks panel
     if (modKey && !e.shiftKey && key === 't') {
       e.preventDefault();
-      tasksPanel.toggle()
+      tasksPanel.toggle();
+    }
+    // Ctrl/Cmd+Shift+T - Toggle templates panel
+    if (modKey && e.shiftKey && key === 't') {
+      e.preventDefault();
+      templatesPanel.toggle();
     }
   });
 }

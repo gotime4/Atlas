@@ -11,6 +11,9 @@ let activeProjectPath = null;
 let onProjectSelectCallback = null;
 let projects = []; // Store projects list for navigation
 let focusedIndex = -1; // Currently focused project index
+let gitStatusCache = {}; // Cache git status for projects
+let recentProjectsLimit = 10; // Max recent projects to show
+let showAllProjects = false; // Toggle for showing all vs recent
 
 /**
  * Initialize project list UI
@@ -58,10 +61,31 @@ function renderProjects(projectsList) {
   // Store sorted projects for navigation
   projects = sortedProjects;
 
-  sortedProjects.forEach((project, index) => {
+  // Determine which projects to show
+  const visibleProjects = showAllProjects
+    ? sortedProjects
+    : sortedProjects.slice(0, recentProjectsLimit);
+
+  visibleProjects.forEach((project, index) => {
     const projectItem = createProjectItem(project, index);
     projectsListElement.appendChild(projectItem);
+    // Request git status for each project
+    requestGitStatus(project.path);
   });
+
+  // Add "Show all/less" button if there are more projects
+  if (sortedProjects.length > recentProjectsLimit) {
+    const toggleBtn = document.createElement('button');
+    toggleBtn.className = 'show-all-projects-btn';
+    toggleBtn.textContent = showAllProjects
+      ? 'Show less'
+      : `Show all ${sortedProjects.length} projects`;
+    toggleBtn.addEventListener('click', () => {
+      showAllProjects = !showAllProjects;
+      renderProjects(projectsList);
+    });
+    projectsListElement.appendChild(toggleBtn);
+  }
 
   // Update focused index based on active project
   focusedIndex = projects.findIndex(p => p.path === activeProjectPath);
@@ -87,18 +111,30 @@ function createProjectItem(project, index) {
   icon.textContent = project.isFrameProject ? '📦' : '📁';
   item.appendChild(icon);
 
+  // Project info container
+  const infoContainer = document.createElement('div');
+  infoContainer.className = 'project-info';
+
   // Project name
   const name = document.createElement('span');
   name.className = 'project-name';
   name.textContent = project.name;
   name.title = project.path;
-  item.appendChild(name);
+  infoContainer.appendChild(name);
 
-  // Frame badge
+  // Git status (will be populated async)
+  const gitStatus = document.createElement('span');
+  gitStatus.className = 'git-status';
+  gitStatus.dataset.projectPath = project.path;
+  infoContainer.appendChild(gitStatus);
+
+  item.appendChild(infoContainer);
+
+  // Atlas badge (formerly Frame)
   if (project.isFrameProject) {
     const badge = document.createElement('span');
-    badge.className = 'frame-badge';
-    badge.textContent = 'Frame';
+    badge.className = 'atlas-badge';
+    badge.textContent = 'Atlas';
     item.appendChild(badge);
   }
 
@@ -122,11 +158,45 @@ function createProjectItem(project, index) {
 }
 
 /**
+ * Request git status for a project
+ */
+function requestGitStatus(projectPath) {
+  ipcRenderer.send(IPC.GET_GIT_STATUS, projectPath);
+}
+
+/**
+ * Update git status display for a project
+ */
+function updateGitStatus(projectPath, status) {
+  gitStatusCache[projectPath] = status;
+
+  const gitStatusElement = document.querySelector(`.git-status[data-project-path="${projectPath}"]`);
+  if (!gitStatusElement) return;
+
+  if (!status.isGitRepo) {
+    gitStatusElement.innerHTML = '';
+    return;
+  }
+
+  let html = `<span class="git-branch" title="Branch: ${status.branch}">${status.branch}</span>`;
+
+  if (status.uncommittedCount > 0) {
+    html += `<span class="git-changes" title="${status.uncommittedCount} uncommitted changes">+${status.uncommittedCount}</span>`;
+  }
+
+  if (status.hasUnpushed) {
+    html += `<span class="git-unpushed" title="Unpushed commits">↑</span>`;
+  }
+
+  gitStatusElement.innerHTML = html;
+}
+
+/**
  * Show confirmation dialog and remove project
  */
 function confirmRemoveProject(projectPath, projectName) {
   const confirmed = window.confirm(
-    `Remove "${projectName}" from the project list?\n\nThis will only remove it from Frame's list. The project files will not be deleted.`
+    `Remove "${projectName}" from the project list?\n\nThis will only remove it from Atlas. The project files will not be deleted.`
   );
 
   if (confirmed) {
@@ -212,6 +282,20 @@ function setupIPC() {
 
   ipcRenderer.on(IPC.WORKSPACE_UPDATED, (event, projects) => {
     renderProjects(projects);
+  });
+
+  // Git status updates
+  ipcRenderer.on(IPC.GIT_STATUS_DATA, (event, { projectPath, status }) => {
+    updateGitStatus(projectPath, status);
+  });
+}
+
+/**
+ * Refresh git status for all visible projects
+ */
+function refreshAllGitStatus() {
+  projects.forEach(project => {
+    requestGitStatus(project.path);
   });
 }
 
@@ -315,5 +399,7 @@ module.exports = {
   selectNextProject,
   selectPrevProject,
   focus,
-  blur
+  blur,
+  refreshAllGitStatus,
+  requestGitStatus
 };

@@ -20,6 +20,10 @@ const fileEditor = require('./fileEditor');
 const tasksManager = require('./tasksManager');
 const pluginsManager = require('./pluginsManager');
 const githubManager = require('./githubManager');
+const settingsManager = require('./settingsManager');
+const sessionManager = require('./sessionManager');
+const templatesManager = require('./templatesManager');
+const gitManager = require('./gitManager');
 
 let mainWindow = null;
 
@@ -35,7 +39,7 @@ function createWindow() {
       contextIsolation: false
     },
     backgroundColor: '#1e1e1e',
-    title: 'Frame'
+    title: 'Atlas'
   });
 
   mainWindow.loadFile('index.html');
@@ -82,6 +86,10 @@ function setupAllIPC() {
   tasksManager.setupIPC(ipcMain);
   pluginsManager.setupIPC(ipcMain);
   githubManager.setupIPC(ipcMain);
+  settingsManager.setupIPC(ipcMain);
+  sessionManager.setupIPC(ipcMain);
+  templatesManager.setupIPC(ipcMain);
+  gitManager.setupIPC(ipcMain);
 
   // Terminal input handler (needs prompt logger integration)
   ipcMain.on(IPC.TERMINAL_INPUT, (event, data) => {
@@ -111,12 +119,16 @@ function initModulesWithWindow(window) {
   tasksManager.init(window);
   pluginsManager.init(window);
   githubManager.init(window);
+  settingsManager.init(window);
+  sessionManager.init(window);
+  templatesManager.init(window);
+  gitManager.init(window);
 }
 
 // App lifecycle
 app.whenReady().then(() => {
-  // macOS'ta menü bar'da "Frame" görünsün
-  app.setName('Frame');
+  // macOS menu bar displays "Atlas"
+  app.setName('Atlas');
 
   init();
   createWindow();

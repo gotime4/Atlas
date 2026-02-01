@@ -665,7 +665,7 @@
       font-weight: 500;
     }
 
-    .project-item .frame-badge {
+    .project-item .atlas-badge {
       font-size: 9px;
       background: var(--accent-primary);
       color: var(--bg-deep);
@@ -675,6 +675,60 @@
       text-transform: uppercase;
       font-weight: 700;
       letter-spacing: 0.3px;
+      flex-shrink: 0;
+    }
+
+    .project-item .project-info {
+      display: flex;
+      flex-direction: column;
+      flex: 1;
+      min-width: 0;
+      gap: 2px;
+    }
+
+    .project-item .git-status {
+      display: flex;
+      align-items: center;
+      gap: var(--space-xs);
+      font-size: 10px;
+      color: var(--text-tertiary);
+    }
+
+    .git-status .git-branch {
+      font-family: var(--font-mono);
+      color: var(--info);
+      background: rgba(120, 165, 212, 0.1);
+      padding: 1px 4px;
+      border-radius: 3px;
+    }
+
+    .git-status .git-changes {
+      color: var(--warning);
+      font-weight: 600;
+    }
+
+    .git-status .git-unpushed {
+      color: var(--success);
+      font-weight: 600;
+    }
+
+    .show-all-projects-btn {
+      width: 100%;
+      background: transparent;
+      border: 1px dashed var(--border-default);
+      color: var(--text-tertiary);
+      padding: var(--space-sm) var(--space-md);
+      border-radius: var(--radius-sm);
+      cursor: pointer;
+      font-size: 11px;
+      margin-top: var(--space-sm);
+      transition: all var(--transition-fast);
+    }
+
+    .show-all-projects-btn:hover {
+      background: var(--bg-hover);
+      border-color: var(--accent-primary);
+      color: var(--accent-primary);
     }
 
     .project-item .project-remove-btn {
@@ -2787,13 +2841,515 @@
     }
 
     /* ==================== END GITHUB PANEL STYLES ==================== */
+
+    /* ==================== THEME SELECTOR ==================== */
+    .theme-selector-container {
+      margin-top: auto;
+      padding-top: var(--space-lg);
+      border-top: 1px solid var(--border-subtle);
+    }
+
+    .theme-selector-btn {
+      display: flex;
+      align-items: center;
+      gap: var(--space-sm);
+      width: 100%;
+      padding: var(--space-sm) var(--space-md);
+      background: var(--bg-tertiary);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-md);
+      color: var(--text-secondary);
+      cursor: pointer;
+      font-size: 12px;
+      transition: all var(--transition-fast);
+    }
+
+    .theme-selector-btn:hover {
+      background: var(--bg-elevated);
+      border-color: var(--accent-primary);
+      color: var(--text-primary);
+    }
+
+    .theme-icon {
+      font-size: 14px;
+    }
+
+    .theme-dropdown {
+      position: absolute;
+      bottom: 60px;
+      left: var(--space-lg);
+      right: var(--space-lg);
+      background: var(--bg-elevated);
+      border: 1px solid var(--border-strong);
+      border-radius: var(--radius-md);
+      box-shadow: var(--shadow-lg);
+      z-index: 1000;
+      overflow: hidden;
+    }
+
+    .theme-dropdown.hidden {
+      display: none;
+    }
+
+    .theme-dropdown-header {
+      padding: var(--space-sm) var(--space-md);
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--text-tertiary);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      border-bottom: 1px solid var(--border-subtle);
+    }
+
+    .theme-options {
+      max-height: 200px;
+      overflow-y: auto;
+    }
+
+    .theme-option {
+      display: flex;
+      align-items: center;
+      gap: var(--space-sm);
+      padding: var(--space-sm) var(--space-md);
+      cursor: pointer;
+      transition: all var(--transition-fast);
+    }
+
+    .theme-option:hover {
+      background: var(--bg-hover);
+    }
+
+    .theme-option.active {
+      background: var(--accent-subtle);
+    }
+
+    .theme-preview {
+      width: 20px;
+      height: 20px;
+      border-radius: 4px;
+      border: 1px solid var(--border-default);
+      flex-shrink: 0;
+    }
+
+    .theme-option-name {
+      flex: 1;
+      font-size: 13px;
+      color: var(--text-primary);
+    }
+
+    .theme-active-check {
+      color: var(--accent-primary);
+      font-weight: 600;
+    }
+
+    /* ==================== TEMPLATES PANEL ==================== */
+    .templates-panel {
+      position: fixed;
+      top: 0;
+      right: 0;
+      width: 380px;
+      height: 100vh;
+      background: var(--bg-secondary);
+      border-left: 1px solid var(--border-default);
+      box-shadow: var(--shadow-lg);
+      z-index: 900;
+      display: flex;
+      flex-direction: column;
+      transition: transform var(--transition-normal);
+    }
+
+    .templates-panel.panel-hidden {
+      transform: translateX(100%);
+    }
+
+    .templates-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: var(--space-lg);
+      border-bottom: 1px solid var(--border-subtle);
+    }
+
+    .templates-header h3 {
+      font-size: 15px;
+      font-weight: 600;
+      color: var(--text-primary);
+      margin: 0;
+    }
+
+    .templates-header-actions {
+      display: flex;
+      gap: var(--space-xs);
+    }
+
+    .templates-header-actions button {
+      background: transparent;
+      border: none;
+      color: var(--text-secondary);
+      font-size: 18px;
+      cursor: pointer;
+      padding: var(--space-xs);
+      border-radius: var(--radius-sm);
+      transition: all var(--transition-fast);
+    }
+
+    .templates-header-actions button:hover {
+      background: var(--bg-hover);
+      color: var(--text-primary);
+    }
+
+    .templates-search {
+      padding: var(--space-md) var(--space-lg);
+      border-bottom: 1px solid var(--border-subtle);
+    }
+
+    .templates-search-input {
+      width: 100%;
+      padding: var(--space-sm) var(--space-md);
+      background: var(--bg-tertiary);
+      border: 1px solid var(--border-default);
+      border-radius: var(--radius-md);
+      color: var(--text-primary);
+      font-size: 13px;
+    }
+
+    .templates-search-input:focus {
+      outline: none;
+      border-color: var(--accent-primary);
+    }
+
+    .templates-list {
+      flex: 1;
+      overflow-y: auto;
+      padding: var(--space-md);
+    }
+
+    .templates-section {
+      margin-bottom: var(--space-lg);
+    }
+
+    .templates-section-header {
+      font-size: 10px;
+      font-weight: 600;
+      color: var(--text-tertiary);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      padding: var(--space-xs) var(--space-sm);
+      margin-bottom: var(--space-sm);
+    }
+
+    .template-item {
+      display: flex;
+      align-items: center;
+      gap: var(--space-sm);
+      padding: var(--space-sm) var(--space-md);
+      background: var(--bg-tertiary);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-md);
+      margin-bottom: var(--space-sm);
+      cursor: pointer;
+      transition: all var(--transition-fast);
+    }
+
+    .template-item:hover {
+      background: var(--bg-elevated);
+      border-color: var(--border-default);
+    }
+
+    .template-icon {
+      font-size: 16px;
+      flex-shrink: 0;
+    }
+
+    .template-content {
+      flex: 1;
+      min-width: 0;
+    }
+
+    .template-name {
+      display: block;
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--text-primary);
+    }
+
+    .template-description {
+      display: block;
+      font-size: 11px;
+      color: var(--text-tertiary);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .template-actions {
+      display: flex;
+      gap: var(--space-xs);
+      opacity: 0;
+      transition: opacity var(--transition-fast);
+    }
+
+    .template-item:hover .template-actions {
+      opacity: 1;
+    }
+
+    .template-insert-btn {
+      background: var(--accent-primary);
+      color: var(--bg-deep);
+      border: none;
+      padding: var(--space-xs) var(--space-sm);
+      border-radius: var(--radius-sm);
+      font-size: 11px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all var(--transition-fast);
+    }
+
+    .template-insert-btn:hover {
+      background: var(--accent-secondary);
+    }
+
+    .template-delete-btn {
+      background: transparent;
+      border: none;
+      color: var(--text-muted);
+      font-size: 16px;
+      cursor: pointer;
+      padding: var(--space-xs);
+    }
+
+    .template-delete-btn:hover {
+      color: var(--error);
+    }
+
+    .template-preview {
+      background: var(--bg-tertiary);
+      border: 1px solid var(--accent-primary);
+      border-radius: var(--radius-md);
+      margin-bottom: var(--space-md);
+      overflow: hidden;
+    }
+
+    .template-preview-header {
+      display: flex;
+      align-items: center;
+      gap: var(--space-sm);
+      padding: var(--space-sm) var(--space-md);
+      background: var(--bg-elevated);
+      border-bottom: 1px solid var(--border-subtle);
+    }
+
+    .template-preview-icon {
+      font-size: 16px;
+    }
+
+    .template-preview-name {
+      flex: 1;
+      font-weight: 600;
+      color: var(--text-primary);
+    }
+
+    .template-preview-close {
+      background: transparent;
+      border: none;
+      color: var(--text-muted);
+      font-size: 18px;
+      cursor: pointer;
+    }
+
+    .template-preview-description {
+      padding: var(--space-sm) var(--space-md);
+      font-size: 12px;
+      color: var(--text-secondary);
+    }
+
+    .template-preview-prompt {
+      padding: var(--space-md);
+      margin: 0;
+      background: var(--bg-deep);
+      font-family: var(--font-mono);
+      font-size: 11px;
+      color: var(--text-secondary);
+      white-space: pre-wrap;
+      max-height: 150px;
+      overflow-y: auto;
+    }
+
+    .template-preview-actions {
+      display: flex;
+      gap: var(--space-sm);
+      padding: var(--space-md);
+      border-top: 1px solid var(--border-subtle);
+    }
+
+    .template-preview-actions button {
+      flex: 1;
+      padding: var(--space-sm) var(--space-md);
+      border-radius: var(--radius-sm);
+      font-size: 12px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all var(--transition-fast);
+    }
+
+    .btn-use-template {
+      background: var(--accent-primary);
+      color: var(--bg-deep);
+      border: none;
+    }
+
+    .btn-use-template:hover {
+      background: var(--accent-secondary);
+    }
+
+    .btn-copy-template {
+      background: transparent;
+      border: 1px solid var(--border-default);
+      color: var(--text-secondary);
+    }
+
+    .btn-copy-template:hover {
+      background: var(--bg-hover);
+      border-color: var(--accent-primary);
+    }
+
+    /* Template Dialog */
+    .template-dialog-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(0, 0, 0, 0.7);
+      backdrop-filter: blur(4px);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 1100;
+    }
+
+    .template-dialog {
+      background: var(--bg-secondary);
+      border: 1px solid var(--border-default);
+      border-radius: var(--radius-lg);
+      width: 480px;
+      max-width: 90vw;
+      box-shadow: var(--shadow-lg);
+    }
+
+    .template-dialog-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: var(--space-lg);
+      border-bottom: 1px solid var(--border-subtle);
+    }
+
+    .template-dialog-header h3 {
+      margin: 0;
+      font-size: 16px;
+      color: var(--text-primary);
+    }
+
+    .template-dialog-close {
+      background: transparent;
+      border: none;
+      color: var(--text-muted);
+      font-size: 20px;
+      cursor: pointer;
+    }
+
+    .template-dialog-body {
+      padding: var(--space-lg);
+    }
+
+    .template-dialog-body .form-group {
+      margin-bottom: var(--space-md);
+    }
+
+    .template-dialog-body label {
+      display: block;
+      font-size: 12px;
+      font-weight: 500;
+      color: var(--text-secondary);
+      margin-bottom: var(--space-xs);
+    }
+
+    .template-dialog-body input,
+    .template-dialog-body textarea {
+      width: 100%;
+      padding: var(--space-sm) var(--space-md);
+      background: var(--bg-tertiary);
+      border: 1px solid var(--border-default);
+      border-radius: var(--radius-md);
+      color: var(--text-primary);
+      font-size: 13px;
+      font-family: inherit;
+    }
+
+    .template-dialog-body textarea {
+      font-family: var(--font-mono);
+      resize: vertical;
+    }
+
+    .template-dialog-body input:focus,
+    .template-dialog-body textarea:focus {
+      outline: none;
+      border-color: var(--accent-primary);
+    }
+
+    .template-dialog-footer {
+      display: flex;
+      justify-content: flex-end;
+      gap: var(--space-sm);
+      padding: var(--space-lg);
+      border-top: 1px solid var(--border-subtle);
+    }
+
+    .template-dialog-footer .btn-cancel {
+      background: transparent;
+      border: 1px solid var(--border-default);
+      color: var(--text-secondary);
+      padding: var(--space-sm) var(--space-lg);
+      border-radius: var(--radius-md);
+      cursor: pointer;
+      transition: all var(--transition-fast);
+    }
+
+    .template-dialog-footer .btn-cancel:hover {
+      background: var(--bg-hover);
+    }
+
+    .template-dialog-footer .btn-save {
+      background: var(--accent-primary);
+      border: none;
+      color: var(--bg-deep);
+      padding: var(--space-sm) var(--space-lg);
+      border-radius: var(--radius-md);
+      font-weight: 600;
+      cursor: pointer;
+      transition: all var(--transition-fast);
+    }
+
+    .template-dialog-footer .btn-save:hover {
+      background: var(--accent-secondary);
+    }
+
+    .templates-empty {
+      text-align: center;
+      color: var(--text-muted);
+      padding: var(--space-xl);
+      font-size: 13px;
+    }
+
+    /* ==================== END TEMPLATES PANEL STYLES ==================== */
   </style>
 </head>
 <body>
   <!-- Sidebar -->
   <div id="sidebar">
     <div id="sidebar-resize-handle"></div>
-    <div id="sidebar-header">Frame</div>
+    <div id="sidebar-header">Atlas</div>
 
     <!-- Projects Section -->
     <div id="projects-section">

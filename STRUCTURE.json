@@ -1,7 +1,7 @@
 {
   "version": "1.0",
   "description": "Claude Code IDE - Module structure and IPC communication map",
-  "lastUpdated": "2026-01-30",
+  "lastUpdated": "2026-02-01",
   "architecture": {
     "type": "electron",
     "mainProcess": "src/main/index.js",
@@ -30,23 +30,27 @@
         "fileEditor",
         "tasksManager",
         "pluginsManager",
-        "githubManager"
+        "githubManager",
+        "settingsManager",
+        "sessionManager",
+        "templatesManager",
+        "gitManager"
       ],
       "functions": {
         "createWindow": {
-          "line": 29,
+          "line": 33,
           "purpose": "Create main application window"
         },
         "setupAllIPC": {
-          "line": 72,
+          "line": 76,
           "purpose": "Setup all IPC handlers"
         },
         "init": {
-          "line": 96,
+          "line": 104,
           "purpose": "Initialize application"
         },
         "initModulesWithWindow": {
-          "line": 107,
+          "line": 115,
           "params": [
             "window"
           ],
@@ -700,7 +704,7 @@
       }
     },
     "renderer/index": {
-      "file": "src\\renderer\\index.js",
+      "file": "src/renderer/index.js",
       "description": "R",
       "exports": [],
       "depends": [
@@ -713,19 +717,22 @@
         "state",
         "projectListUI",
         "editor",
-        "sidebarResize"
+        "sidebarResize",
+        "themesUI",
+        "templatesPanel",
+        "sessionUI"
       ],
       "functions": {
         "init": {
-          "line": 20,
+          "line": 23,
           "purpose": "Initialize all modules"
         },
         "setupButtonHandlers": {
-          "line": 126,
+          "line": 154,
           "purpose": "Setup button click handlers"
         },
         "setupKeyboardShortcuts": {
-          "line": 179,
+          "line": 207,
           "purpose": "Setup keyboard shortcuts"
         }
       }
@@ -1377,7 +1384,9 @@
         "selectNextProject",
         "selectPrevProject",
         "focus",
-        "blur"
+        "blur",
+        "refreshAllGitStatus",
+        "requestGitStatus"
       ],
       "depends": [
         "electron",
@@ -1385,7 +1394,7 @@
       ],
       "functions": {
         "init": {
-          "line": 18,
+          "line": 21,
           "params": [
             "containerId",
             "onSelectCallback"
@@ -1393,26 +1402,41 @@
           "purpose": "Initialize project list UI"
         },
         "loadProjects": {
-          "line": 27,
+          "line": 30,
           "purpose": "Load projects from workspace"
         },
         "renderProjects": {
-          "line": 34,
+          "line": 37,
           "params": [
             "projectsList"
           ],
           "purpose": "Render project list"
         },
         "createProjectItem": {
-          "line": 73,
+          "line": 97,
           "params": [
             "project",
             "index"
           ],
           "purpose": "Create a project item element"
         },
+        "requestGitStatus": {
+          "line": 163,
+          "params": [
+            "projectPath"
+          ],
+          "purpose": "Request git status for a project"
+        },
+        "updateGitStatus": {
+          "line": 170,
+          "params": [
+            "projectPath",
+            "status"
+          ],
+          "purpose": "Update git status display for a project"
+        },
         "confirmRemoveProject": {
-          "line": 127,
+          "line": 197,
           "params": [
             "projectPath",
             "projectName"
@@ -1420,25 +1444,25 @@
           "purpose": "Show confirmation dialog and remove project"
         },
         "selectProject": {
-          "line": 153,
+          "line": 223,
           "params": [
             "projectPath"
           ],
           "purpose": "Terminal session switching is handled by state.js via multiTerminalUI"
         },
         "setActiveProject": {
-          "line": 164,
+          "line": 234,
           "params": [
             "projectPath"
           ],
           "purpose": "Set active project (visual only)"
         },
         "getActiveProject": {
-          "line": 183,
+          "line": 253,
           "purpose": "Get active project path"
         },
         "addProject": {
-          "line": 190,
+          "line": 260,
           "params": [
             "projectPath",
             "projectName",
@@ -1447,47 +1471,53 @@
           "purpose": "Add project to workspace"
         },
         "removeProject": {
-          "line": 201,
+          "line": 271,
           "params": [
             "projectPath"
           ],
           "purpose": "Remove project from workspace"
         },
         "setupIPC": {
-          "line": 208,
+          "line": 278,
           "purpose": "Setup IPC listeners"
         },
+        "refreshAllGitStatus": {
+          "line": 296,
+          "purpose": "Refresh git status for all visible projects"
+        },
         "selectNextProject": {
-          "line": 221,
+          "line": 305,
           "purpose": "Select next project in list"
         },
         "selectPrevProject": {
-          "line": 232,
+          "line": 316,
           "purpose": "Select previous project in list"
         },
         "focus": {
-          "line": 243,
+          "line": 327,
           "purpose": "Focus project list for keyboard navigation"
         },
         "handleKeydown": {
-          "line": 266,
+          "line": 350,
           "params": [
             "e"
           ],
           "purpose": "Handle keyboard navigation in project list"
         },
         "blur": {
-          "line": 301,
+          "line": 385,
           "purpose": "Blur/unfocus project list"
         }
       },
       "ipc": {
         "listens": [
           "WORKSPACE_DATA",
-          "WORKSPACE_UPDATED"
+          "WORKSPACE_UPDATED",
+          "GIT_STATUS_DATA"
         ],
         "emits": [
           "LOAD_WORKSPACE",
+          "GET_GIT_STATUS",
           "ADD_PROJECT_TO_WORKSPACE",
           "REMOVE_PROJECT_FROM_WORKSPACE"
         ]
@@ -2331,6 +2361,624 @@
         ],
         "emits": [
           "OPEN_GITHUB_ISSUE"
+        ]
+      }
+    },
+    "main/gitManager": {
+      "file": "src/main/gitManager.js",
+      "description": "G",
+      "exports": [
+        "init",
+        "setupIPC",
+        "isGitRepo",
+        "getGitStatus",
+        "getDetailedGitStatus",
+        "getBranchName",
+        "getUncommittedCount"
+      ],
+      "depends": [
+        "child_process",
+        "path",
+        "fs",
+        "shared/ipcChannels"
+      ],
+      "functions": {
+        "isGitRepo": {
+          "line": 16,
+          "params": [
+            "projectPath"
+          ],
+          "purpose": "Check if path is a git repository"
+        },
+        "getBranchName": {
+          "line": 28,
+          "params": [
+            "projectPath"
+          ],
+          "purpose": "Get current branch name"
+        },
+        "getUncommittedCount": {
+          "line": 44,
+          "params": [
+            "projectPath"
+          ],
+          "purpose": "Get uncommitted changes count"
+        },
+        "getUncommittedChanges": {
+          "line": 61,
+          "params": [
+            "projectPath"
+          ],
+          "purpose": "Get detailed uncommitted changes"
+        },
+        "hasUnpushedCommits": {
+          "line": 99,
+          "params": [
+            "projectPath"
+          ],
+          "purpose": "Check if there are unpushed commits"
+        },
+        "getLastCommit": {
+          "line": 116,
+          "params": [
+            "projectPath"
+          ],
+          "purpose": "Get last commit info"
+        },
+        "getGitStatus": {
+          "line": 145,
+          "params": [
+            "projectPath"
+          ],
+          "purpose": "Get full git status for a project"
+        },
+        "getDetailedGitStatus": {
+          "line": 174,
+          "params": [
+            "projectPath"
+          ],
+          "purpose": "Get detailed git status (includes file changes)"
+        },
+        "init": {
+          "line": 185,
+          "params": [
+            "window"
+          ],
+          "purpose": "Initialize module with window reference"
+        },
+        "setupIPC": {
+          "line": 192,
+          "params": [
+            "ipcMain"
+          ],
+          "purpose": "Setup IPC handlers"
+        }
+      },
+      "ipc": {
+        "listens": [
+          "GET_GIT_STATUS",
+          "REFRESH_GIT_STATUS"
+        ],
+        "emits": [
+          "GIT_STATUS_DATA"
+        ]
+      }
+    },
+    "main/sessionManager": {
+      "file": "src/main/sessionManager.js",
+      "description": "S",
+      "exports": [
+        "init",
+        "setupIPC",
+        "loadSession",
+        "saveSession",
+        "addToRecentProjects",
+        "setActiveProject",
+        "getRecentProjects"
+      ],
+      "depends": [
+        "fs",
+        "path",
+        "os",
+        "shared/ipcChannels"
+      ],
+      "functions": {
+        "ensureSettingsDir": {
+          "line": 27,
+          "purpose": "Ensure settings directory exists"
+        },
+        "loadSession": {
+          "line": 36,
+          "purpose": "Load session from disk"
+        },
+        "saveSession": {
+          "line": 63,
+          "params": [
+            "session"
+          ],
+          "purpose": "Save session to disk"
+        },
+        "addToRecentProjects": {
+          "line": 78,
+          "params": [
+            "projectPath"
+          ],
+          "purpose": "Add a project to recent projects"
+        },
+        "setActiveProject": {
+          "line": 102,
+          "params": [
+            "projectPath"
+          ],
+          "purpose": "Update active project in session"
+        },
+        "getRecentProjects": {
+          "line": 121,
+          "params": [
+            "limit = 10"
+          ],
+          "purpose": "Get recent projects"
+        },
+        "init": {
+          "line": 129,
+          "params": [
+            "window"
+          ],
+          "purpose": "Initialize module with window reference"
+        },
+        "setupIPC": {
+          "line": 136,
+          "params": [
+            "ipcMain"
+          ],
+          "purpose": "Setup IPC handlers"
+        }
+      },
+      "ipc": {
+        "listens": [
+          "LOAD_SESSION",
+          "SAVE_SESSION"
+        ],
+        "emits": [
+          "SESSION_DATA"
+        ]
+      }
+    },
+    "main/settingsManager": {
+      "file": "src/main/settingsManager.js",
+      "description": "S",
+      "exports": [
+        "init",
+        "setupIPC",
+        "loadSettings",
+        "saveSettings",
+        "loadThemes",
+        "saveCustomTheme"
+      ],
+      "depends": [
+        "fs",
+        "path",
+        "os",
+        "shared/ipcChannels"
+      ],
+      "functions": {
+        "ensureSettingsDir": {
+          "line": 117,
+          "purpose": "Ensure settings directory exists"
+        },
+        "loadSettings": {
+          "line": 126,
+          "purpose": "Load settings from disk"
+        },
+        "saveSettings": {
+          "line": 142,
+          "params": [
+            "settings"
+          ],
+          "purpose": "Save settings to disk"
+        },
+        "loadThemes": {
+          "line": 154,
+          "purpose": "Load themes from disk (includes built-in + custom)"
+        },
+        "saveCustomTheme": {
+          "line": 171,
+          "params": [
+            "themeId",
+            "theme"
+          ],
+          "purpose": "Save custom themes to disk"
+        },
+        "init": {
+          "line": 190,
+          "params": [
+            "window"
+          ],
+          "purpose": "Initialize module with window reference"
+        },
+        "setupIPC": {
+          "line": 197,
+          "params": [
+            "ipcMain"
+          ],
+          "purpose": "Setup IPC handlers"
+        }
+      },
+      "ipc": {
+        "listens": [
+          "LOAD_SETTINGS",
+          "UPDATE_SETTING",
+          "LOAD_THEMES",
+          "SET_THEME"
+        ],
+        "emits": [
+          "SETTINGS_DATA",
+          "SETTING_UPDATED",
+          "THEMES_DATA",
+          "THEME_UPDATED"
+        ]
+      }
+    },
+    "main/templatesManager": {
+      "file": "src/main/templatesManager.js",
+      "description": "T",
+      "exports": [
+        "init",
+        "setupIPC",
+        "loadTemplates",
+        "saveTemplate",
+        "deleteTemplate"
+      ],
+      "depends": [
+        "fs",
+        "path",
+        "os",
+        "shared/ipcChannels"
+      ],
+      "functions": {
+        "ensureSettingsDir": {
+          "line": 87,
+          "purpose": "Ensure settings directory exists"
+        },
+        "loadTemplates": {
+          "line": 96,
+          "purpose": "Load templates from disk (includes built-in + custom)"
+        },
+        "saveTemplate": {
+          "line": 113,
+          "params": [
+            "template"
+          ],
+          "purpose": "Save custom template"
+        },
+        "deleteTemplate": {
+          "line": 148,
+          "params": [
+            "templateId"
+          ],
+          "purpose": "Delete custom template"
+        },
+        "init": {
+          "line": 168,
+          "params": [
+            "window"
+          ],
+          "purpose": "Initialize module with window reference"
+        },
+        "setupIPC": {
+          "line": 175,
+          "params": [
+            "ipcMain"
+          ],
+          "purpose": "Setup IPC handlers"
+        }
+      },
+      "ipc": {
+        "listens": [
+          "LOAD_TEMPLATES",
+          "SAVE_TEMPLATE",
+          "DELETE_TEMPLATE"
+        ],
+        "emits": [
+          "TEMPLATES_DATA",
+          "TEMPLATE_SAVED"
+        ]
+      }
+    },
+    "renderer/sessionUI": {
+      "file": "src/renderer/sessionUI.js",
+      "description": "S",
+      "exports": [
+        "init",
+        "loadSession",
+        "saveSession",
+        "setActiveProject",
+        "addOpenProject",
+        "removeOpenProject",
+        "getLastActiveProject",
+        "getRecentProjects",
+        "getCurrentSession"
+      ],
+      "depends": [
+        "electron",
+        "shared/ipcChannels"
+      ],
+      "functions": {
+        "init": {
+          "line": 15,
+          "params": [
+            "onLoadCallback"
+          ],
+          "purpose": "Initialize session management"
+        },
+        "loadSession": {
+          "line": 24,
+          "purpose": "Load session from backend"
+        },
+        "saveSession": {
+          "line": 31,
+          "params": [
+            "sessionData"
+          ],
+          "purpose": "Save current session"
+        },
+        "setActiveProject": {
+          "line": 39,
+          "params": [
+            "projectPath"
+          ],
+          "purpose": "Update active project in session"
+        },
+        "addOpenProject": {
+          "line": 48,
+          "params": [
+            "projectPath"
+          ],
+          "purpose": "Add project to open projects"
+        },
+        "removeOpenProject": {
+          "line": 66,
+          "params": [
+            "projectPath"
+          ],
+          "purpose": "Remove project from open projects"
+        },
+        "getLastActiveProject": {
+          "line": 79,
+          "purpose": "Get last active project"
+        },
+        "getRecentProjects": {
+          "line": 86,
+          "purpose": "Get recent projects"
+        },
+        "setupIPC": {
+          "line": 93,
+          "purpose": "Setup IPC listeners"
+        },
+        "getCurrentSession": {
+          "line": 106,
+          "purpose": "Get current session"
+        }
+      },
+      "ipc": {
+        "listens": [
+          "SESSION_DATA"
+        ],
+        "emits": [
+          "LOAD_SESSION",
+          "SAVE_SESSION"
+        ]
+      }
+    },
+    "renderer/templatesPanel": {
+      "file": "src/renderer/templatesPanel.js",
+      "description": "T",
+      "exports": [
+        "init",
+        "show",
+        "hide",
+        "toggle",
+        "isVisible",
+        "loadTemplates"
+      ],
+      "depends": [
+        "electron",
+        "shared/ipcChannels"
+      ],
+      "functions": {
+        "init": {
+          "line": 32,
+          "params": [
+            "insertCallback"
+          ],
+          "purpose": "Initialize templates panel"
+        },
+        "createPanel": {
+          "line": 42,
+          "purpose": "Create panel HTML"
+        },
+        "loadTemplates": {
+          "line": 88,
+          "purpose": "Load templates from backend"
+        },
+        "renderTemplates": {
+          "line": 95,
+          "params": [
+            "templatesList"
+          ],
+          "purpose": "Render templates list"
+        },
+        "createSection": {
+          "line": 127,
+          "params": [
+            "title",
+            "sectionTemplates",
+            "showDelete = false"
+          ],
+          "purpose": "Create a section with templates"
+        },
+        "createTemplateItem": {
+          "line": 147,
+          "params": [
+            "template",
+            "showDelete = false"
+          ],
+          "purpose": "Create a template item element"
+        },
+        "insertTemplate": {
+          "line": 215,
+          "params": [
+            "template"
+          ],
+          "purpose": "Insert template into terminal"
+        },
+        "showTemplatePreview": {
+          "line": 226,
+          "params": [
+            "template"
+          ],
+          "purpose": "Show template preview"
+        },
+        "filterTemplates": {
+          "line": 272,
+          "params": [
+            "query"
+          ],
+          "purpose": "Filter templates by search query"
+        },
+        "showCreateTemplateDialog": {
+          "line": 291,
+          "purpose": "Show create template dialog"
+        },
+        "saveTemplate": {
+          "line": 359,
+          "params": [
+            "template"
+          ],
+          "purpose": "Save a custom template"
+        },
+        "deleteTemplate": {
+          "line": 366,
+          "params": [
+            "templateId"
+          ],
+          "purpose": "Delete a template"
+        },
+        "setupIPC": {
+          "line": 375,
+          "purpose": "Setup IPC listeners"
+        },
+        "show": {
+          "line": 394,
+          "purpose": "Show panel"
+        },
+        "hide": {
+          "line": 405,
+          "purpose": "Hide panel"
+        },
+        "toggle": {
+          "line": 415,
+          "purpose": "Toggle panel visibility"
+        },
+        "isVisibleState": {
+          "line": 426,
+          "purpose": "Check if panel is visible"
+        },
+        "escapeHtml": {
+          "line": 433,
+          "params": [
+            "str"
+          ],
+          "purpose": "Helper: escape HTML"
+        }
+      },
+      "ipc": {
+        "listens": [
+          "TEMPLATES_DATA",
+          "TEMPLATE_SAVED",
+          "TOGGLE_TEMPLATES_PANEL"
+        ],
+        "emits": [
+          "LOAD_TEMPLATES",
+          "SAVE_TEMPLATE",
+          "DELETE_TEMPLATE"
+        ]
+      }
+    },
+    "renderer/themesUI": {
+      "file": "src/renderer/themesUI.js",
+      "description": "T",
+      "exports": [
+        "init",
+        "loadThemes",
+        "setTheme",
+        "getCurrentTheme",
+        "getThemes"
+      ],
+      "depends": [
+        "electron",
+        "shared/ipcChannels"
+      ],
+      "functions": {
+        "init": {
+          "line": 16,
+          "purpose": "Initialize themes system"
+        },
+        "createThemeSelector": {
+          "line": 25,
+          "purpose": "Create theme selector dropdown in the sidebar header"
+        },
+        "loadThemes": {
+          "line": 77,
+          "purpose": "Load themes from backend"
+        },
+        "renderThemeOptions": {
+          "line": 84,
+          "purpose": "Render theme options"
+        },
+        "setTheme": {
+          "line": 129,
+          "params": [
+            "themeId"
+          ],
+          "purpose": "Set active theme"
+        },
+        "applyTheme": {
+          "line": 136,
+          "params": [
+            "themeId",
+            "theme"
+          ],
+          "purpose": "Apply theme to document"
+        },
+        "setupIPC": {
+          "line": 166,
+          "purpose": "Setup IPC listeners"
+        },
+        "getCurrentTheme": {
+          "line": 190,
+          "purpose": "Get current theme ID"
+        },
+        "getThemes": {
+          "line": 197,
+          "purpose": "Get all available themes"
+        },
+        "hexToRgb": {
+          "line": 204,
+          "params": [
+            "hex"
+          ],
+          "purpose": "Helper: Convert hex to RGB"
+        }
+      },
+      "ipc": {
+        "listens": [
+          "THEMES_DATA",
+          "THEME_UPDATED"
+        ],
+        "emits": [
+          "LOAD_THEMES",
+          "SET_THEME"
         ]
       }
     }

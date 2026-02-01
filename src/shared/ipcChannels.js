@@ -82,7 +82,35 @@ const IPC = {
   LOAD_GITHUB_ISSUES: 'load-github-issues',
   GITHUB_ISSUES_DATA: 'github-issues-data',
   TOGGLE_GITHUB_PANEL: 'toggle-github-panel',
-  OPEN_GITHUB_ISSUE: 'open-github-issue'
+  OPEN_GITHUB_ISSUE: 'open-github-issue',
+
+  // Settings & Themes
+  LOAD_SETTINGS: 'load-settings',
+  SETTINGS_DATA: 'settings-data',
+  UPDATE_SETTING: 'update-setting',
+  SETTING_UPDATED: 'setting-updated',
+  LOAD_THEMES: 'load-themes',
+  THEMES_DATA: 'themes-data',
+  SET_THEME: 'set-theme',
+  THEME_UPDATED: 'theme-updated',
+
+  // Sessions
+  SAVE_SESSION: 'save-session',
+  LOAD_SESSION: 'load-session',
+  SESSION_DATA: 'session-data',
+
+  // Prompt Templates
+  LOAD_TEMPLATES: 'load-templates',
+  TEMPLATES_DATA: 'templates-data',
+  SAVE_TEMPLATE: 'save-template',
+  DELETE_TEMPLATE: 'delete-template',
+  TEMPLATE_SAVED: 'template-saved',
+  TOGGLE_TEMPLATES_PANEL: 'toggle-templates-panel',
+
+  // Git Status
+  GET_GIT_STATUS: 'get-git-status',
+  GIT_STATUS_DATA: 'git-status-data',
+  REFRESH_GIT_STATUS: 'refresh-git-status'
 };
 
 module.exports = { IPC };
