@@ -10,6 +10,9 @@ let fileTreeElement = null;
 let currentProjectPath = null;
 let onFileClickCallback = null;
 let focusedItem = null;
+let expandedPaths = new Set(); // Track which folders are expanded
+let lastLoadedProjectPath = null; // Track which project the tree was loaded for
+let lastFileTreeHash = ''; // Hash to detect if file tree changed
 
 /**
  * Initialize file tree UI
@@ -93,30 +96,46 @@ function renderFileTree(files, parentElement, indent = 0) {
       if (file.children && file.children.length > 0) {
         childrenContainer = document.createElement('div');
         childrenContainer.className = 'folder-children';
-        childrenContainer.style.display = 'none'; // Start collapsed
+        wrapper.appendChild(childrenContainer);
 
         // Recursively render children
         renderFileTree(file.children, childrenContainer, indent + 1);
-        wrapper.appendChild(childrenContainer);
       }
 
-      // Toggle folder on click (works for both empty and non-empty folders)
+      // Check if this folder was previously expanded (restore state on re-render)
+      const wasExpanded = expandedPaths.has(file.path);
+      const arrow = fileItem.querySelector('.folder-arrow');
+
+      if (wasExpanded && childrenContainer) {
+        childrenContainer.style.display = 'block';
+        if (arrow) arrow.style.transform = 'rotate(90deg)';
+      } else {
+        if (childrenContainer) childrenContainer.style.display = 'none';
+        if (arrow) arrow.style.transform = 'rotate(0deg)';
+      }
+
+      // Toggle folder on click
       fileItem.addEventListener('click', (e) => {
         e.stopPropagation();
         e.preventDefault();
 
-        const arrow = fileItem.querySelector('.folder-arrow');
+        const arrowEl = fileItem.querySelector('.folder-arrow');
+        const isExpanded = expandedPaths.has(file.path);
 
-        if (childrenContainer) {
-          const isExpanded = childrenContainer.style.display !== 'none';
-
-          if (isExpanded) {
+        if (isExpanded) {
+          // Collapse
+          expandedPaths.delete(file.path);
+          if (childrenContainer) {
             childrenContainer.style.display = 'none';
-            if (arrow) arrow.style.transform = 'rotate(0deg)';
-          } else {
-            childrenContainer.style.display = 'block';
-            if (arrow) arrow.style.transform = 'rotate(90deg)';
           }
+          if (arrowEl) arrowEl.style.transform = 'rotate(0deg)';
+        } else {
+          // Expand
+          expandedPaths.add(file.path);
+          if (childrenContainer) {
+            childrenContainer.style.display = 'block';
+          }
+          if (arrowEl) arrowEl.style.transform = 'rotate(90deg)';
         }
       });
     } else {
@@ -143,27 +162,76 @@ function clearFileTree() {
 }
 
 /**
+ * Reset file tree state (including expanded folders)
+ */
+function resetFileTree() {
+  clearFileTree();
+  expandedPaths.clear();
+}
+
+/**
  * Refresh file tree
  */
 function refreshFileTree(projectPath) {
   const path = projectPath || (currentProjectPath && currentProjectPath());
   if (path) {
-    ipcRenderer.send(IPC.LOAD_FILE_TREE, path);
+    // Use loadFileTree to benefit from debouncing
+    loadFileTree(path);
   }
 }
 
 /**
  * Load file tree for path
  */
+let loadDebounceTimer = null;
 function loadFileTree(projectPath) {
-  ipcRenderer.send(IPC.LOAD_FILE_TREE, projectPath);
+  // Reset expanded paths if loading a different project
+  if (projectPath !== lastLoadedProjectPath) {
+    expandedPaths.clear();
+    lastLoadedProjectPath = projectPath;
+    lastFileTreeHash = ''; // Reset hash for new project
+  }
+
+  // Debounce rapid load requests
+  if (loadDebounceTimer) {
+    clearTimeout(loadDebounceTimer);
+  }
+  loadDebounceTimer = setTimeout(() => {
+    ipcRenderer.send(IPC.LOAD_FILE_TREE, projectPath);
+    loadDebounceTimer = null;
+  }, 100);
+}
+
+/**
+ * Create a simple hash of the file tree for comparison
+ */
+function hashFileTree(files) {
+  return JSON.stringify(files.map(f => ({
+    n: f.name,
+    p: f.path,
+    d: f.isDirectory,
+    c: f.children ? hashFileTree(f.children) : null
+  })));
 }
 
 /**
  * Setup IPC listeners
  */
+let ipcSetup = false;
 function setupIPC() {
+  // Prevent duplicate listeners
+  if (ipcSetup) return;
+  ipcSetup = true;
+
   ipcRenderer.on(IPC.FILE_TREE_DATA, (event, files) => {
+    // Check if file tree actually changed
+    const newHash = hashFileTree(files);
+    if (newHash === lastFileTreeHash) {
+      // File tree unchanged, skip re-render
+      return;
+    }
+    lastFileTreeHash = newHash;
+
     clearFileTree();
     renderFileTree(files, fileTreeElement);
   });
@@ -295,6 +363,7 @@ module.exports = {
   setOnFileClick,
   renderFileTree,
   clearFileTree,
+  resetFileTree,
   refreshFileTree,
   loadFileTree,
   focus,

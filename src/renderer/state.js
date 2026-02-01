@@ -49,6 +49,11 @@ function setMultiTerminalUI(ui) {
  * Set project path and switch terminal session
  */
 function setProjectPath(path) {
+  // Prevent setting the same path repeatedly
+  if (path === currentProjectPath) {
+    return;
+  }
+
   const previousPath = currentProjectPath;
   currentProjectPath = path;
   updateProjectUI();
@@ -182,7 +187,12 @@ function createNewProject() {
 /**
  * Setup IPC listeners
  */
+let ipcSetup = false;
 function setupIPC() {
+  // Prevent duplicate listeners
+  if (ipcSetup) return;
+  ipcSetup = true;
+
   ipcRenderer.on(IPC.PROJECT_SELECTED, (event, projectPath) => {
     setProjectPath(projectPath);
     // Terminal session switching is now handled by setProjectPath via multiTerminalUI

@@ -834,6 +834,7 @@
         "setOnFileClick",
         "renderFileTree",
         "clearFileTree",
+        "resetFileTree",
         "refreshFileTree",
         "loadFileTree",
         "focus",
@@ -845,7 +846,7 @@
       ],
       "functions": {
         "init": {
-          "line": 17,
+          "line": 20,
           "params": [
             "elementId",
             "getProjectPath"
@@ -853,21 +854,21 @@
           "purpose": "Initialize file tree UI"
         },
         "setProjectPathGetter": {
-          "line": 31,
+          "line": 34,
           "params": [
             "getter"
           ],
           "purpose": "Set project path getter"
         },
         "setOnFileClick": {
-          "line": 38,
+          "line": 41,
           "params": [
             "callback"
           ],
           "purpose": "Set file click callback"
         },
         "renderFileTree": {
-          "line": 45,
+          "line": 48,
           "params": [
             "files",
             "parentElement",
@@ -876,44 +877,53 @@
           "purpose": "Render file tree recursively"
         },
         "clearFileTree": {
-          "line": 139,
+          "line": 158,
           "purpose": "Clear file tree"
         },
+        "resetFileTree": {
+          "line": 167,
+          "purpose": "Reset file tree state (including expanded folders)"
+        },
         "refreshFileTree": {
-          "line": 148,
+          "line": 175,
           "params": [
             "projectPath"
           ],
           "purpose": "Refresh file tree"
         },
         "loadFileTree": {
-          "line": 158,
+          "line": 187,
           "params": [
             "projectPath"
+          ]
+        },
+        "hashFileTree": {
+          "line": 208,
+          "params": [
+            "files"
           ],
-          "purpose": "Load file tree for path"
+          "purpose": "Create a simple hash of the file tree for comparison"
         },
         "setupIPC": {
-          "line": 165,
-          "purpose": "Setup IPC listeners"
+          "line": 221
         },
         "focus": {
-          "line": 175,
+          "line": 243,
           "purpose": "Focus file tree for keyboard navigation"
         },
         "getVisibleItems": {
-          "line": 203,
+          "line": 271,
           "purpose": "Get all visible file items (for navigation)"
         },
         "handleKeydown": {
-          "line": 222,
+          "line": 290,
           "params": [
             "e"
           ],
           "purpose": "Handle keyboard navigation in file tree"
         },
         "blur": {
-          "line": 284,
+          "line": 352,
           "purpose": "Blur/unfocus file tree"
         }
       },
@@ -922,7 +932,6 @@
           "FILE_TREE_DATA"
         ],
         "emits": [
-          "LOAD_FILE_TREE",
           "LOAD_FILE_TREE"
         ]
       }
@@ -1043,60 +1052,59 @@
           "purpose": "Set project path and switch terminal session"
         },
         "onProjectChange": {
-          "line": 76,
+          "line": 81,
           "params": [
             "callback"
           ],
           "purpose": "Register callback for project change"
         },
         "getIsFrameProject": {
-          "line": 83,
+          "line": 88,
           "purpose": "Get Frame project status"
         },
         "setIsFrameProject": {
-          "line": 90,
+          "line": 95,
           "params": [
             "isFrame"
           ],
           "purpose": "Set Frame project status"
         },
         "onFrameStatusChange": {
-          "line": 101,
+          "line": 106,
           "params": [
             "callback"
           ],
           "purpose": "Register callback for Frame status change"
         },
         "onFrameInitialized": {
-          "line": 108,
+          "line": 113,
           "params": [
             "callback"
           ],
           "purpose": "Register callback for Frame project initialized"
         },
         "updateFrameUI": {
-          "line": 115,
+          "line": 120,
           "purpose": "Update Frame-related UI"
         },
         "initializeAsFrameProject": {
-          "line": 129,
+          "line": 134,
           "purpose": "Initialize current project as Frame project"
         },
         "updateProjectUI": {
-          "line": 142,
+          "line": 147,
           "purpose": "Update project UI elements"
         },
         "selectProjectFolder": {
-          "line": 171,
+          "line": 176,
           "purpose": "Request folder selection"
         },
         "createNewProject": {
-          "line": 178,
+          "line": 183,
           "purpose": "Request new project creation"
         },
         "setupIPC": {
-          "line": 185,
-          "purpose": "Setup IPC listeners"
+          "line": 191
         }
       },
       "ipc": {
@@ -1451,18 +1459,18 @@
           "purpose": "Terminal session switching is handled by state.js via multiTerminalUI"
         },
         "setActiveProject": {
-          "line": 256,
+          "line": 261,
           "params": [
             "projectPath"
           ],
           "purpose": "Set active project (visual only)"
         },
         "getActiveProject": {
-          "line": 275,
+          "line": 280,
           "purpose": "Get active project path"
         },
         "addProject": {
-          "line": 282,
+          "line": 287,
           "params": [
             "projectPath",
             "projectName",
@@ -1471,41 +1479,40 @@
           "purpose": "Add project to workspace"
         },
         "removeProject": {
-          "line": 293,
+          "line": 298,
           "params": [
             "projectPath"
           ],
           "purpose": "Remove project from workspace"
         },
         "setupIPC": {
-          "line": 300,
-          "purpose": "Setup IPC listeners"
+          "line": 306
         },
         "refreshAllGitStatus": {
-          "line": 320,
+          "line": 330,
           "purpose": "Refresh git status for all visible projects"
         },
         "selectNextProject": {
-          "line": 329,
+          "line": 339,
           "purpose": "Select next project in list"
         },
         "selectPrevProject": {
-          "line": 340,
+          "line": 350,
           "purpose": "Select previous project in list"
         },
         "focus": {
-          "line": 351,
+          "line": 361,
           "purpose": "Focus project list for keyboard navigation"
         },
         "handleKeydown": {
-          "line": 374,
+          "line": 384,
           "params": [
             "e"
           ],
           "purpose": "Handle keyboard navigation in project list"
         },
         "blur": {
-          "line": 409,
+          "line": 419,
           "purpose": "Blur/unfocus project list"
         }
       },

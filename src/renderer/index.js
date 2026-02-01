@@ -122,8 +122,8 @@ function init() {
 
   // Setup Frame status change listener
   state.onFrameStatusChange((isFrame) => {
-    // Refresh project list when Frame status changes
-    projectListUI.loadProjects();
+    // Don't reload entire project list - just update the active project's badge if needed
+    // The badge will be updated when the project list is next rendered
   });
 
   // Setup Atlas initialized listener

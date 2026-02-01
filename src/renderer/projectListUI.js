@@ -243,6 +243,11 @@ function confirmRemoveProject(projectPath, projectName) {
  * Terminal session switching is handled by state.js via multiTerminalUI
  */
 function selectProject(projectPath) {
+  // Don't re-select the same project
+  if (projectPath === activeProjectPath) {
+    return;
+  }
+
   setActiveProject(projectPath);
 
   if (onProjectSelectCallback) {
@@ -297,7 +302,12 @@ function removeProject(projectPath) {
 /**
  * Setup IPC listeners
  */
+let ipcSetup = false;
 function setupIPC() {
+  // Prevent duplicate listeners
+  if (ipcSetup) return;
+  ipcSetup = true;
+
   ipcRenderer.on(IPC.WORKSPACE_DATA, (event, projects) => {
     renderProjects(projects);
   });
