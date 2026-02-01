@@ -3162,6 +3162,405 @@
 
     /* ==================== END GITHUB PANEL STYLES ==================== */
 
+    /* ==================== AGENTS PANEL STYLES ==================== */
+    #agents-panel {
+      width: 450px;
+      background: linear-gradient(180deg, var(--bg-secondary) 0%, var(--bg-primary) 100%);
+      border-left: 1px solid var(--border-subtle);
+      display: none;
+      flex-direction: column;
+      position: relative;
+      z-index: 10;
+      transition: transform var(--transition-normal), opacity var(--transition-normal);
+    }
+
+    #agents-panel.visible {
+      display: flex;
+      transform: translateX(0);
+      opacity: 1;
+    }
+
+    #agents-panel:not(.visible) {
+      transform: translateX(100%);
+      opacity: 0;
+      pointer-events: none;
+    }
+
+    #agents-header {
+      display: flex;
+      align-items: center;
+      padding: var(--space-md) var(--space-lg);
+      border-bottom: 1px solid var(--border-subtle);
+      background: var(--bg-secondary);
+      gap: var(--space-sm);
+    }
+
+    #agents-header h3 {
+      flex: 1;
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--text-primary);
+      margin: 0;
+    }
+
+    .agents-header-actions {
+      display: flex;
+      gap: var(--space-xs);
+    }
+
+    .agents-header-actions button {
+      background: transparent;
+      border: none;
+      color: var(--text-tertiary);
+      cursor: pointer;
+      padding: var(--space-xs);
+      border-radius: var(--radius-sm);
+      transition: all var(--transition-fast);
+    }
+
+    .agents-header-actions button:hover {
+      color: var(--text-primary);
+      background: var(--bg-hover);
+    }
+
+    #agents-content {
+      flex: 1;
+      overflow-y: auto;
+      padding: var(--space-md);
+    }
+
+    .agents-empty {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 100%;
+      color: var(--text-tertiary);
+      text-align: center;
+      padding: var(--space-xl);
+    }
+
+    .agents-empty-hint {
+      font-size: 12px;
+      margin-top: var(--space-sm);
+      opacity: 0.7;
+    }
+
+    .agent-item {
+      background: var(--bg-tertiary);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-md);
+      margin-bottom: var(--space-sm);
+      overflow: hidden;
+    }
+
+    .agent-item.expanded {
+      border-color: var(--accent-primary);
+    }
+
+    .agent-header {
+      display: flex;
+      align-items: center;
+      padding: var(--space-sm) var(--space-md);
+      cursor: pointer;
+      gap: var(--space-sm);
+      transition: background var(--transition-fast);
+    }
+
+    .agent-header:hover {
+      background: var(--bg-hover);
+    }
+
+    .agent-header.unsaved::after {
+      content: '●';
+      color: var(--warning);
+      margin-left: auto;
+      margin-right: var(--space-sm);
+    }
+
+    .agent-scope-icon {
+      font-size: 14px;
+    }
+
+    .agent-name {
+      font-weight: 600;
+      color: var(--text-primary);
+      flex: 1;
+    }
+
+    .agent-scope-label {
+      font-size: 11px;
+      color: var(--text-tertiary);
+      background: var(--bg-elevated);
+      padding: 2px 6px;
+      border-radius: var(--radius-sm);
+    }
+
+    .agent-expand-icon {
+      color: var(--text-tertiary);
+      font-size: 10px;
+    }
+
+    .agent-description {
+      padding: 0 var(--space-md) var(--space-sm);
+      font-size: 12px;
+      color: var(--text-secondary);
+      line-height: 1.4;
+    }
+
+    .agent-content {
+      border-top: 1px solid var(--border-subtle);
+    }
+
+    .agent-editor {
+      width: 100%;
+      min-height: 300px;
+      padding: var(--space-md);
+      background: var(--bg-deep);
+      border: none;
+      color: var(--text-primary);
+      font-family: 'SF Mono', Monaco, 'Cascadia Code', monospace;
+      font-size: 12px;
+      line-height: 1.5;
+      resize: vertical;
+    }
+
+    .agent-editor:focus {
+      outline: none;
+    }
+
+    .agent-path {
+      padding: var(--space-xs) var(--space-md);
+      font-size: 10px;
+      color: var(--text-tertiary);
+      background: var(--bg-secondary);
+      border-top: 1px solid var(--border-subtle);
+    }
+
+    .btn-agents-toggle {
+      display: flex;
+      align-items: center;
+      gap: var(--space-xs);
+      padding: var(--space-xs) var(--space-md) !important;
+      background: var(--bg-tertiary) !important;
+      border: 1px solid var(--border-subtle) !important;
+      font-size: 11px !important;
+      font-weight: 500;
+      margin-left: var(--space-xs);
+    }
+
+    .btn-agents-toggle:hover {
+      background: rgba(147, 112, 219, 0.15) !important;
+      border-color: rgb(147, 112, 219) !important;
+      color: rgb(147, 112, 219) !important;
+    }
+
+    .btn-agents-toggle svg {
+      flex-shrink: 0;
+    }
+
+    /* ==================== END AGENTS PANEL STYLES ==================== */
+
+    /* ==================== SKILLS PANEL STYLES ==================== */
+    #skills-panel {
+      width: 450px;
+      background: linear-gradient(180deg, var(--bg-secondary) 0%, var(--bg-primary) 100%);
+      border-left: 1px solid var(--border-subtle);
+      display: none;
+      flex-direction: column;
+      position: relative;
+      z-index: 10;
+      transition: transform var(--transition-normal), opacity var(--transition-normal);
+    }
+
+    #skills-panel.visible {
+      display: flex;
+      transform: translateX(0);
+      opacity: 1;
+    }
+
+    #skills-panel:not(.visible) {
+      transform: translateX(100%);
+      opacity: 0;
+      pointer-events: none;
+    }
+
+    #skills-header {
+      display: flex;
+      align-items: center;
+      padding: var(--space-md) var(--space-lg);
+      border-bottom: 1px solid var(--border-subtle);
+      background: var(--bg-secondary);
+      gap: var(--space-sm);
+    }
+
+    #skills-header h3 {
+      flex: 1;
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--text-primary);
+      margin: 0;
+    }
+
+    .skills-header-actions {
+      display: flex;
+      gap: var(--space-xs);
+    }
+
+    .skills-header-actions button {
+      background: transparent;
+      border: none;
+      color: var(--text-tertiary);
+      cursor: pointer;
+      padding: var(--space-xs);
+      border-radius: var(--radius-sm);
+      transition: all var(--transition-fast);
+    }
+
+    .skills-header-actions button:hover {
+      color: var(--text-primary);
+      background: var(--bg-hover);
+    }
+
+    #skills-content {
+      flex: 1;
+      overflow-y: auto;
+      padding: var(--space-md);
+    }
+
+    .skills-empty {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 100%;
+      color: var(--text-tertiary);
+      text-align: center;
+      padding: var(--space-xl);
+    }
+
+    .skills-empty-hint {
+      font-size: 12px;
+      margin-top: var(--space-sm);
+      opacity: 0.7;
+    }
+
+    .skill-item {
+      background: var(--bg-tertiary);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-md);
+      margin-bottom: var(--space-sm);
+      overflow: hidden;
+    }
+
+    .skill-item.expanded {
+      border-color: var(--warning);
+    }
+
+    .skill-header {
+      display: flex;
+      align-items: center;
+      padding: var(--space-sm) var(--space-md);
+      cursor: pointer;
+      gap: var(--space-sm);
+      transition: background var(--transition-fast);
+    }
+
+    .skill-header:hover {
+      background: var(--bg-hover);
+    }
+
+    .skill-header.unsaved::after {
+      content: '●';
+      color: var(--warning);
+      margin-left: auto;
+      margin-right: var(--space-sm);
+    }
+
+    .skill-scope-icon {
+      font-size: 14px;
+    }
+
+    .skill-command {
+      font-weight: 600;
+      color: var(--warning);
+      font-family: 'SF Mono', Monaco, monospace;
+      flex: 1;
+    }
+
+    .skill-scope-label {
+      font-size: 11px;
+      color: var(--text-tertiary);
+      background: var(--bg-elevated);
+      padding: 2px 6px;
+      border-radius: var(--radius-sm);
+    }
+
+    .skill-expand-icon {
+      color: var(--text-tertiary);
+      font-size: 10px;
+    }
+
+    .skill-description {
+      padding: 0 var(--space-md) var(--space-sm);
+      font-size: 12px;
+      color: var(--text-secondary);
+      line-height: 1.4;
+    }
+
+    .skill-content {
+      border-top: 1px solid var(--border-subtle);
+    }
+
+    .skill-editor {
+      width: 100%;
+      min-height: 300px;
+      padding: var(--space-md);
+      background: var(--bg-deep);
+      border: none;
+      color: var(--text-primary);
+      font-family: 'SF Mono', Monaco, 'Cascadia Code', monospace;
+      font-size: 12px;
+      line-height: 1.5;
+      resize: vertical;
+    }
+
+    .skill-editor:focus {
+      outline: none;
+    }
+
+    .skill-path {
+      padding: var(--space-xs) var(--space-md);
+      font-size: 10px;
+      color: var(--text-tertiary);
+      background: var(--bg-secondary);
+      border-top: 1px solid var(--border-subtle);
+    }
+
+    .btn-skills-toggle {
+      display: flex;
+      align-items: center;
+      gap: var(--space-xs);
+      padding: var(--space-xs) var(--space-md) !important;
+      background: var(--bg-tertiary) !important;
+      border: 1px solid var(--border-subtle) !important;
+      font-size: 11px !important;
+      font-weight: 500;
+      margin-left: var(--space-xs);
+    }
+
+    .btn-skills-toggle:hover {
+      background: rgba(255, 193, 7, 0.15) !important;
+      border-color: var(--warning) !important;
+      color: var(--warning) !important;
+    }
+
+    .btn-skills-toggle svg {
+      flex-shrink: 0;
+    }
+
+    /* ==================== END SKILLS PANEL STYLES ==================== */
+
     /* ==================== THEME SELECTOR ==================== */
     .theme-selector-container {
       margin-top: auto;
@@ -3818,6 +4217,52 @@
       </div>
       <div id="github-content">
         <!-- GitHub content will be populated here -->
+      </div>
+    </div>
+
+    <!-- Agents Panel -->
+    <div id="agents-panel">
+      <div id="agents-header">
+        <button id="agents-collapse-btn" title="Collapse panel">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="9 18 15 12 9 6"/>
+          </svg>
+        </button>
+        <h3>Agents</h3>
+        <div class="agents-header-actions">
+          <button id="agents-refresh" tabindex="-1" title="Refresh agents">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M21.5 2v6h-6M2.5 22v-6h6M2 11.5a10 10 0 0 1 18.8-4.3M22 12.5a10 10 0 0 1-18.8 4.2"/>
+            </svg>
+          </button>
+          <button id="agents-close" tabindex="-1">✕</button>
+        </div>
+      </div>
+      <div id="agents-content">
+        <!-- Agents will be populated here -->
+      </div>
+    </div>
+
+    <!-- Skills Panel -->
+    <div id="skills-panel">
+      <div id="skills-header">
+        <button id="skills-collapse-btn" title="Collapse panel">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="9 18 15 12 9 6"/>
+          </svg>
+        </button>
+        <h3>Skills</h3>
+        <div class="skills-header-actions">
+          <button id="skills-refresh" tabindex="-1" title="Refresh skills">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M21.5 2v6h-6M2.5 22v-6h6M2 11.5a10 10 0 0 1 18.8-4.3M22 12.5a10 10 0 0 1-18.8 4.2"/>
+            </svg>
+          </button>
+          <button id="skills-close" tabindex="-1">✕</button>
+        </div>
+      </div>
+      <div id="skills-content">
+        <!-- Skills will be populated here -->
       </div>
     </div>
 

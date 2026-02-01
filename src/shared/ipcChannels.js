@@ -114,7 +114,21 @@ const IPC = {
   // Git Status
   GET_GIT_STATUS: 'get-git-status',
   GIT_STATUS_DATA: 'git-status-data',
-  REFRESH_GIT_STATUS: 'refresh-git-status'
+  REFRESH_GIT_STATUS: 'refresh-git-status',
+
+  // Agents Panel
+  LOAD_AGENTS: 'load-agents',
+  AGENTS_DATA: 'agents-data',
+  SAVE_AGENT: 'save-agent',
+  AGENT_SAVED: 'agent-saved',
+  TOGGLE_AGENTS_PANEL: 'toggle-agents-panel',
+
+  // Skills Panel
+  LOAD_SKILLS: 'load-skills',
+  SKILLS_DATA: 'skills-data',
+  SAVE_SKILL: 'save-skill',
+  SKILL_SAVED: 'skill-saved',
+  TOGGLE_SKILLS_PANEL: 'toggle-skills-panel'
 };
 
 module.exports = { IPC };

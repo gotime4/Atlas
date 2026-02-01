@@ -34,23 +34,25 @@
         "settingsManager",
         "sessionManager",
         "templatesManager",
-        "gitManager"
+        "gitManager",
+        "agentsManager",
+        "skillsManager"
       ],
       "functions": {
         "createWindow": {
-          "line": 33,
+          "line": 35,
           "purpose": "Create main application window"
         },
         "setupAllIPC": {
-          "line": 76,
+          "line": 78,
           "purpose": "Setup all IPC handlers"
         },
         "init": {
-          "line": 104,
+          "line": 108,
           "purpose": "Initialize application"
         },
         "initModulesWithWindow": {
-          "line": 115,
+          "line": 119,
           "params": [
             "window"
           ],
@@ -720,19 +722,21 @@
         "sidebarResize",
         "themesUI",
         "templatesPanel",
-        "sessionUI"
+        "sessionUI",
+        "agentsPanel",
+        "skillsPanel"
       ],
       "functions": {
         "init": {
-          "line": 23,
+          "line": 25,
           "purpose": "Initialize all modules"
         },
         "setupButtonHandlers": {
-          "line": 154,
+          "line": 166,
           "purpose": "Setup button click handlers"
         },
         "setupKeyboardShortcuts": {
-          "line": 207,
+          "line": 219,
           "purpose": "Setup keyboard shortcuts"
         }
       }
@@ -1946,7 +1950,9 @@
       "depends": [
         "tasksPanel",
         "pluginsPanel",
-        "githubPanel"
+        "githubPanel",
+        "agentsPanel",
+        "skillsPanel"
       ],
       "functions": {}
     },
@@ -3074,6 +3080,352 @@
         "emits": [
           "LOAD_THEMES",
           "SET_THEME"
+        ]
+      }
+    },
+    "main/agentsManager": {
+      "file": "src/main/agentsManager.js",
+      "description": "A",
+      "exports": [
+        "init",
+        "setupIPC",
+        "loadAgents",
+        "saveAgent"
+      ],
+      "depends": [
+        "fs",
+        "path",
+        "os",
+        "shared/ipcChannels"
+      ],
+      "functions": {
+        "init": {
+          "line": 16,
+          "params": [
+            "window"
+          ],
+          "purpose": "Initialize module"
+        },
+        "findClaudeDirs": {
+          "line": 24,
+          "params": [
+            "projectPath"
+          ],
+          "purpose": "Searches: project dir, parent dirs up to home, and ~/.claude"
+        },
+        "loadAgents": {
+          "line": 66,
+          "params": [
+            "projectPath"
+          ],
+          "purpose": "Load agents from all accessible .claude directories"
+        },
+        "extractDescription": {
+          "line": 129,
+          "params": [
+            "content"
+          ],
+          "purpose": "Handles YAML frontmatter if present"
+        },
+        "saveAgent": {
+          "line": 172,
+          "params": [
+            "filePath",
+            "content"
+          ],
+          "purpose": "Save agent content"
+        },
+        "setupIPC": {
+          "line": 185,
+          "params": [
+            "ipcMain"
+          ],
+          "purpose": "Setup IPC handlers"
+        }
+      },
+      "ipc": {
+        "listens": [
+          "LOAD_AGENTS",
+          "SAVE_AGENT"
+        ],
+        "emits": [
+          "AGENTS_DATA",
+          "AGENT_SAVED"
+        ]
+      }
+    },
+    "main/skillsManager": {
+      "file": "src/main/skillsManager.js",
+      "description": "S",
+      "exports": [
+        "init",
+        "setupIPC",
+        "loadSkills",
+        "saveSkill"
+      ],
+      "depends": [
+        "fs",
+        "path",
+        "os",
+        "shared/ipcChannels"
+      ],
+      "functions": {
+        "init": {
+          "line": 16,
+          "params": [
+            "window"
+          ],
+          "purpose": "Initialize module"
+        },
+        "findClaudeDirs": {
+          "line": 24,
+          "params": [
+            "projectPath"
+          ],
+          "purpose": "Searches: project dir, parent dirs up to home, and ~/.claude"
+        },
+        "loadSkills": {
+          "line": 69,
+          "params": [
+            "projectPath"
+          ],
+          "purpose": "- .claude/skills/skillname/SKILL.md (subdirectories)"
+        },
+        "extractDescription": {
+          "line": 148,
+          "params": [
+            "content"
+          ],
+          "purpose": "Handles YAML frontmatter if present"
+        },
+        "saveSkill": {
+          "line": 191,
+          "params": [
+            "filePath",
+            "content"
+          ],
+          "purpose": "Save skill content"
+        },
+        "setupIPC": {
+          "line": 204,
+          "params": [
+            "ipcMain"
+          ],
+          "purpose": "Setup IPC handlers"
+        }
+      },
+      "ipc": {
+        "listens": [
+          "LOAD_SKILLS",
+          "SAVE_SKILL"
+        ],
+        "emits": [
+          "SKILLS_DATA",
+          "SKILL_SAVED"
+        ]
+      }
+    },
+    "renderer/agentsPanel": {
+      "file": "src/renderer/agentsPanel.js",
+      "description": "A",
+      "exports": [
+        "init",
+        "toggle",
+        "isVisible",
+        "setProjectPath",
+        "loadAgents"
+      ],
+      "depends": [
+        "electron",
+        "shared/ipcChannels"
+      ],
+      "functions": {
+        "init": {
+          "line": 21,
+          "purpose": "Initialize agents panel"
+        },
+        "setupPanelEvents": {
+          "line": 31,
+          "purpose": "Setup panel event handlers"
+        },
+        "toggle": {
+          "line": 48,
+          "purpose": "Toggle panel visibility"
+        },
+        "isVisible": {
+          "line": 66,
+          "purpose": "Check if panel is visible"
+        },
+        "setProjectPath": {
+          "line": 73,
+          "params": [
+            "projectPath"
+          ],
+          "purpose": "Set current project path"
+        },
+        "loadAgents": {
+          "line": 83,
+          "purpose": "Load agents from main process"
+        },
+        "renderAgents": {
+          "line": 92,
+          "purpose": "Render agents list"
+        },
+        "createAgentItem": {
+          "line": 116,
+          "params": [
+            "agent"
+          ],
+          "purpose": "Create an agent item element"
+        },
+        "toggleAgent": {
+          "line": 194,
+          "params": [
+            "agent"
+          ],
+          "purpose": "Toggle agent expansion"
+        },
+        "saveCurrentIfChanged": {
+          "line": 220,
+          "purpose": "Save current agent if changed"
+        },
+        "extractDescription": {
+          "line": 240,
+          "params": [
+            "content"
+          ],
+          "purpose": "Extract description from content (handles YAML frontmatter)"
+        },
+        "updateSaveIndicator": {
+          "line": 275,
+          "params": [
+            "item",
+            "unsaved"
+          ],
+          "purpose": "Update save indicator"
+        },
+        "getScopeIcon": {
+          "line": 287,
+          "params": [
+            "scope"
+          ],
+          "purpose": "Get scope icon"
+        },
+        "setupIPC": {
+          "line": 300
+        }
+      },
+      "ipc": {
+        "listens": [
+          "AGENTS_DATA",
+          "AGENT_SAVED",
+          "TOGGLE_AGENTS_PANEL"
+        ],
+        "emits": [
+          "LOAD_AGENTS",
+          "SAVE_AGENT"
+        ]
+      }
+    },
+    "renderer/skillsPanel": {
+      "file": "src/renderer/skillsPanel.js",
+      "description": "S",
+      "exports": [
+        "init",
+        "toggle",
+        "isVisible",
+        "setProjectPath",
+        "loadSkills"
+      ],
+      "depends": [
+        "electron",
+        "shared/ipcChannels"
+      ],
+      "functions": {
+        "init": {
+          "line": 21,
+          "purpose": "Initialize skills panel"
+        },
+        "setupPanelEvents": {
+          "line": 31,
+          "purpose": "Setup panel event handlers"
+        },
+        "toggle": {
+          "line": 48,
+          "purpose": "Toggle panel visibility"
+        },
+        "isVisible": {
+          "line": 66,
+          "purpose": "Check if panel is visible"
+        },
+        "setProjectPath": {
+          "line": 73,
+          "params": [
+            "projectPath"
+          ],
+          "purpose": "Set current project path"
+        },
+        "loadSkills": {
+          "line": 83,
+          "purpose": "Load skills from main process"
+        },
+        "renderSkills": {
+          "line": 92,
+          "purpose": "Render skills list"
+        },
+        "createSkillItem": {
+          "line": 116,
+          "params": [
+            "skill"
+          ],
+          "purpose": "Create a skill item element"
+        },
+        "toggleSkill": {
+          "line": 194,
+          "params": [
+            "skill"
+          ],
+          "purpose": "Toggle skill expansion"
+        },
+        "saveCurrentIfChanged": {
+          "line": 220,
+          "purpose": "Save current skill if changed"
+        },
+        "extractDescription": {
+          "line": 240,
+          "params": [
+            "content"
+          ],
+          "purpose": "Extract description from content (handles YAML frontmatter)"
+        },
+        "updateSaveIndicator": {
+          "line": 275,
+          "params": [
+            "item",
+            "unsaved"
+          ],
+          "purpose": "Update save indicator"
+        },
+        "getScopeIcon": {
+          "line": 287,
+          "params": [
+            "scope"
+          ],
+          "purpose": "Get scope icon"
+        },
+        "setupIPC": {
+          "line": 300
+        }
+      },
+      "ipc": {
+        "listens": [
+          "SKILLS_DATA",
+          "SKILL_SAVED",
+          "TOGGLE_SKILLS_PANEL"
+        ],
+        "emits": [
+          "LOAD_SKILLS",
+          "SAVE_SKILL"
         ]
       }
     }

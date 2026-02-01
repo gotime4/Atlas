@@ -16,6 +16,8 @@ const sidebarResize = require('./sidebarResize');
 const themesUI = require('./themesUI');
 const templatesPanel = require('./templatesPanel');
 const sessionUI = require('./sessionUI');
+const agentsPanel = require('./agentsPanel');
+const skillsPanel = require('./skillsPanel');
 
 /**
  * Initialize all modules
@@ -71,6 +73,12 @@ function init() {
   // Initialize GitHub panel
   githubPanel.init();
 
+  // Initialize agents panel
+  agentsPanel.init();
+
+  // Initialize skills panel
+  skillsPanel.init();
+
   // Initialize sidebar resize
   sidebarResize.init(() => {
     terminal.fitTerminal();
@@ -115,6 +123,10 @@ function init() {
 
       // Refresh git status for the project
       projectListUI.requestGitStatus(projectPath);
+
+      // Update agents and skills panels with new project path
+      agentsPanel.setProjectPath(projectPath);
+      skillsPanel.setProjectPath(projectPath);
     } else {
       fileTreeUI.clearFileTree();
     }
@@ -261,6 +273,16 @@ function setupKeyboardShortcuts() {
     if (modKey && e.shiftKey && key === 't') {
       e.preventDefault();
       templatesPanel.toggle();
+    }
+    // Ctrl/Cmd+Shift+A - Toggle agents panel
+    if (modKey && e.shiftKey && key === 'a') {
+      e.preventDefault();
+      agentsPanel.toggle();
+    }
+    // Ctrl/Cmd+Shift+S - Toggle skills panel
+    if (modKey && e.shiftKey && key === 's') {
+      e.preventDefault();
+      skillsPanel.toggle();
     }
   });
 }
