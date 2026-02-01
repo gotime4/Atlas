@@ -15,6 +15,7 @@ let gitStatusCache = {}; // Cache git status for projects
 let gitStatusPending = {}; // Track pending git status requests
 let recentProjectsLimit = 10; // Max recent projects to show
 let showAllProjects = false; // Toggle for showing all vs recent
+let lastProjectsHash = ''; // Track if projects list changed
 
 /**
  * Initialize project list UI
@@ -37,6 +38,14 @@ function loadProjects() {
  */
 function renderProjects(projectsList) {
   if (!projectsListElement) return;
+
+  // Create a hash to detect if the list actually changed
+  const newHash = JSON.stringify(projectsList?.map(p => p.path + p.name + p.isFrameProject) || []);
+  if (newHash === lastProjectsHash) {
+    // List hasn't changed, skip re-render
+    return;
+  }
+  lastProjectsHash = newHash;
 
   projectsListElement.innerHTML = '';
 

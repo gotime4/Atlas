@@ -167,8 +167,11 @@ function setupIPC(ipcMain) {
 
   ipcMain.on(IPC.ADD_PROJECT_TO_WORKSPACE, (event, { projectPath, name, isFrameProject }) => {
     const added = addProject(projectPath, name, isFrameProject);
-    const projects = getProjects();
-    event.sender.send(IPC.WORKSPACE_UPDATED, projects);
+    // Only send update if project was actually added (not already in list)
+    if (added) {
+      const projects = getProjects();
+      event.sender.send(IPC.WORKSPACE_UPDATED, projects);
+    }
   });
 
   ipcMain.on(IPC.REMOVE_PROJECT_FROM_WORKSPACE, (event, projectPath) => {
