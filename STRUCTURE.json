@@ -1394,7 +1394,7 @@
       ],
       "functions": {
         "init": {
-          "line": 21,
+          "line": 22,
           "params": [
             "containerId",
             "onSelectCallback"
@@ -1402,18 +1402,18 @@
           "purpose": "Initialize project list UI"
         },
         "loadProjects": {
-          "line": 30,
+          "line": 31,
           "purpose": "Load projects from workspace"
         },
         "renderProjects": {
-          "line": 37,
+          "line": 38,
           "params": [
             "projectsList"
           ],
           "purpose": "Render project list"
         },
         "createProjectItem": {
-          "line": 97,
+          "line": 98,
           "params": [
             "project",
             "index"
@@ -1421,14 +1421,14 @@
           "purpose": "Create a project item element"
         },
         "requestGitStatus": {
-          "line": 163,
+          "line": 164,
           "params": [
             "projectPath"
           ],
-          "purpose": "Request git status for a project"
+          "purpose": "Request git status for a project (with deduplication)"
         },
         "updateGitStatus": {
-          "line": 170,
+          "line": 183,
           "params": [
             "projectPath",
             "status"
@@ -1436,7 +1436,7 @@
           "purpose": "Update git status display for a project"
         },
         "confirmRemoveProject": {
-          "line": 197,
+          "line": 210,
           "params": [
             "projectPath",
             "projectName"
@@ -1444,25 +1444,25 @@
           "purpose": "Show confirmation dialog and remove project"
         },
         "selectProject": {
-          "line": 223,
+          "line": 236,
           "params": [
             "projectPath"
           ],
           "purpose": "Terminal session switching is handled by state.js via multiTerminalUI"
         },
         "setActiveProject": {
-          "line": 234,
+          "line": 247,
           "params": [
             "projectPath"
           ],
           "purpose": "Set active project (visual only)"
         },
         "getActiveProject": {
-          "line": 253,
+          "line": 266,
           "purpose": "Get active project path"
         },
         "addProject": {
-          "line": 260,
+          "line": 273,
           "params": [
             "projectPath",
             "projectName",
@@ -1471,41 +1471,41 @@
           "purpose": "Add project to workspace"
         },
         "removeProject": {
-          "line": 271,
+          "line": 284,
           "params": [
             "projectPath"
           ],
           "purpose": "Remove project from workspace"
         },
         "setupIPC": {
-          "line": 278,
+          "line": 291,
           "purpose": "Setup IPC listeners"
         },
         "refreshAllGitStatus": {
-          "line": 296,
+          "line": 311,
           "purpose": "Refresh git status for all visible projects"
         },
         "selectNextProject": {
-          "line": 305,
+          "line": 320,
           "purpose": "Select next project in list"
         },
         "selectPrevProject": {
-          "line": 316,
+          "line": 331,
           "purpose": "Select previous project in list"
         },
         "focus": {
-          "line": 327,
+          "line": 342,
           "purpose": "Focus project list for keyboard navigation"
         },
         "handleKeydown": {
-          "line": 350,
+          "line": 365,
           "params": [
             "e"
           ],
           "purpose": "Handle keyboard navigation in project list"
         },
         "blur": {
-          "line": 385,
+          "line": 400,
           "purpose": "Blur/unfocus project list"
         }
       },

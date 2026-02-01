@@ -12,6 +12,7 @@ let onProjectSelectCallback = null;
 let projects = []; // Store projects list for navigation
 let focusedIndex = -1; // Currently focused project index
 let gitStatusCache = {}; // Cache git status for projects
+let gitStatusPending = {}; // Track pending git status requests
 let recentProjectsLimit = 10; // Max recent projects to show
 let showAllProjects = false; // Toggle for showing all vs recent
 
@@ -158,9 +159,21 @@ function createProjectItem(project, index) {
 }
 
 /**
- * Request git status for a project
+ * Request git status for a project (with deduplication)
  */
 function requestGitStatus(projectPath) {
+  // Skip if request is already pending
+  if (gitStatusPending[projectPath]) {
+    return;
+  }
+
+  // If we have cached status, display it immediately
+  if (gitStatusCache[projectPath]) {
+    updateGitStatus(projectPath, gitStatusCache[projectPath]);
+  }
+
+  // Mark as pending and request fresh status
+  gitStatusPending[projectPath] = true;
   ipcRenderer.send(IPC.GET_GIT_STATUS, projectPath);
 }
 
@@ -286,6 +299,8 @@ function setupIPC() {
 
   // Git status updates
   ipcRenderer.on(IPC.GIT_STATUS_DATA, (event, { projectPath, status }) => {
+    // Clear pending flag
+    gitStatusPending[projectPath] = false;
     updateGitStatus(projectPath, status);
   });
 }
