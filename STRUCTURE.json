@@ -2286,14 +2286,14 @@
           "purpose": "Load GitHub Actions workflow runs"
         },
         "openIssue": {
-          "line": 163,
+          "line": 171,
           "params": [
             "url"
           ],
           "purpose": "Open issue/PR/action in browser"
         },
         "setupIPC": {
-          "line": 172,
+          "line": 180,
           "params": [
             "ipcMain"
           ],

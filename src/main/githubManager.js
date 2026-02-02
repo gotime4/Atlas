@@ -134,11 +134,19 @@ async function loadActions(projectPath, status = '') {
     return { error: 'Not a GitHub repository', runs: [] };
   }
 
+  // Valid status values for gh run list
+  const validStatuses = [
+    'queued', 'completed', 'in_progress', 'requested', 'waiting',
+    'pending', 'action_required', 'cancelled', 'failure', 'neutral',
+    'skipped', 'stale', 'startup_failure', 'success', 'timed_out'
+  ];
+
   return new Promise((resolve) => {
     // Get workflow runs with status filter
     let cmd = 'gh run list --json databaseId,displayTitle,name,status,conclusion,event,headBranch,createdAt,updatedAt,url,workflowName --limit 30';
 
-    if (status && status !== 'all') {
+    // Only add status filter if it's a valid value
+    if (status && status !== 'all' && validStatuses.includes(status)) {
       cmd += ` --status ${status}`;
     }
 
