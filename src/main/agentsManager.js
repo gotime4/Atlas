@@ -180,6 +180,44 @@ function saveAgent(filePath, content) {
 }
 
 /**
+ * Create a new agent
+ */
+function createAgent(name, content, scope, projectPath) {
+  try {
+    let targetDir;
+
+    if (scope === 'user') {
+      // Create in ~/.claude/agents/
+      targetDir = path.join(os.homedir(), '.claude', 'agents');
+    } else {
+      // Create in project's .claude/agents/
+      if (!projectPath) {
+        return { success: false, error: 'No project path specified' };
+      }
+      targetDir = path.join(projectPath, '.claude', 'agents');
+    }
+
+    // Ensure directory exists
+    if (!fs.existsSync(targetDir)) {
+      fs.mkdirSync(targetDir, { recursive: true });
+    }
+
+    const filePath = path.join(targetDir, `${name}.md`);
+
+    // Check if file already exists
+    if (fs.existsSync(filePath)) {
+      return { success: false, error: `Agent "${name}" already exists` };
+    }
+
+    fs.writeFileSync(filePath, content, 'utf8');
+    return { success: true, filePath };
+  } catch (err) {
+    console.error('Error creating agent:', err);
+    return { success: false, error: err.message };
+  }
+}
+
+/**
  * Setup IPC handlers
  */
 function setupIPC(ipcMain) {
@@ -192,11 +230,17 @@ function setupIPC(ipcMain) {
     const result = saveAgent(filePath, content);
     event.sender.send(IPC.AGENT_SAVED, result);
   });
+
+  ipcMain.on(IPC.CREATE_AGENT, (event, { name, content, scope, projectPath }) => {
+    const result = createAgent(name, content, scope, projectPath);
+    event.sender.send(IPC.AGENT_CREATED, result);
+  });
 }
 
 module.exports = {
   init,
   setupIPC,
   loadAgents,
-  saveAgent
+  saveAgent,
+  createAgent
 };

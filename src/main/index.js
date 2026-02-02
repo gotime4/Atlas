@@ -26,6 +26,9 @@ const templatesManager = require('./templatesManager');
 const gitManager = require('./gitManager');
 const agentsManager = require('./agentsManager');
 const skillsManager = require('./skillsManager');
+const mcpManager = require('./mcpManager');
+const diffManager = require('./diffManager');
+const contextManager = require('./contextManager');
 
 let mainWindow = null;
 
@@ -94,6 +97,9 @@ function setupAllIPC() {
   gitManager.setupIPC(ipcMain);
   agentsManager.setupIPC(ipcMain);
   skillsManager.setupIPC(ipcMain);
+  mcpManager.setupIPC(ipcMain);
+  diffManager.setupIPC(ipcMain);
+  contextManager.setupIPC(ipcMain);
 
   // Terminal input handler (needs prompt logger integration)
   ipcMain.on(IPC.TERMINAL_INPUT, (event, data) => {
@@ -129,6 +135,9 @@ function initModulesWithWindow(window) {
   gitManager.init(window);
   agentsManager.init(window);
   skillsManager.init(window);
+  mcpManager.init(window);
+  diffManager.init(window);
+  contextManager.init(window);
 }
 
 // App lifecycle

@@ -137,6 +137,11 @@ async function refreshPlugins() {
  * Show plugins panel
  */
 function show() {
+  // Close other right-side panels for mutual exclusivity
+  if (window.closeOtherRightPanels) {
+    window.closeOtherRightPanels('plugins');
+  }
+
   if (panelElement) {
     panelElement.classList.add('visible');
     isVisible = true;
@@ -342,14 +347,18 @@ async function togglePlugin(pluginId) {
 function installPlugin(pluginName) {
   const command = `claude plugin install ${pluginName}`;
 
+  // Copy command to clipboard as fallback
+  navigator.clipboard.writeText(command).catch(() => {});
+
   // Send command to terminal
   if (typeof window.terminalSendCommand === 'function') {
     window.terminalSendCommand(command);
-    showToast(`Installing ${pluginName}...`, 'info');
+    showToast(`Sent install command to terminal. Run Claude Code if not active.`, 'info');
     // Hide panel so user can see terminal
     hide();
   } else {
-    showToast('Terminal not available', 'error');
+    showToast(`Command copied: ${command}`, 'info');
+    hide();
   }
 }
 

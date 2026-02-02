@@ -266,6 +266,13 @@ class MultiTerminalUI {
   }
 
   /**
+   * Send input text without pressing Enter (for templates)
+   */
+  sendInput(text, terminalId = null) {
+    this.manager.sendInput(text, terminalId);
+  }
+
+  /**
    * Set active terminal
    */
   setActiveTerminal(terminalId) {

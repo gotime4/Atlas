@@ -124,7 +124,7 @@ function renderTemplates(templatesList) {
 /**
  * Create a section with templates
  */
-function createSection(title, sectionTemplates, showDelete = false) {
+function createSection(title, sectionTemplates, isCustomSection = false) {
   const section = document.createElement('div');
   section.className = 'templates-section';
 
@@ -133,8 +133,8 @@ function createSection(title, sectionTemplates, showDelete = false) {
   header.textContent = title;
   section.appendChild(header);
 
-  sectionTemplates.forEach(template => {
-    const item = createTemplateItem(template, showDelete);
+  sectionTemplates.forEach((template, index) => {
+    const item = createTemplateItem(template, isCustomSection, index, sectionTemplates.length);
     section.appendChild(item);
   });
 
@@ -144,7 +144,7 @@ function createSection(title, sectionTemplates, showDelete = false) {
 /**
  * Create a template item element
  */
-function createTemplateItem(template, showDelete = false) {
+function createTemplateItem(template, isCustom = false, index = 0, totalCustom = 0) {
   const item = document.createElement('div');
   item.className = 'template-item';
   item.dataset.id = template.id;
@@ -175,7 +175,58 @@ function createTemplateItem(template, showDelete = false) {
   const actions = document.createElement('div');
   actions.className = 'template-actions';
 
-  // Insert button
+  // For custom templates, add management buttons
+  if (isCustom) {
+    // Move up button
+    if (index > 0) {
+      const upBtn = document.createElement('button');
+      upBtn.className = 'template-action-btn';
+      upBtn.innerHTML = '↑';
+      upBtn.title = 'Move up';
+      upBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        moveTemplate(template.id, 'up');
+      });
+      actions.appendChild(upBtn);
+    }
+
+    // Move down button
+    if (index < totalCustom - 1) {
+      const downBtn = document.createElement('button');
+      downBtn.className = 'template-action-btn';
+      downBtn.innerHTML = '↓';
+      downBtn.title = 'Move down';
+      downBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        moveTemplate(template.id, 'down');
+      });
+      actions.appendChild(downBtn);
+    }
+
+    // Edit button
+    const editBtn = document.createElement('button');
+    editBtn.className = 'template-action-btn';
+    editBtn.innerHTML = '✎';
+    editBtn.title = 'Edit template';
+    editBtn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      showEditTemplateDialog(template);
+    });
+    actions.appendChild(editBtn);
+
+    // Delete button
+    const deleteBtn = document.createElement('button');
+    deleteBtn.className = 'template-delete-btn';
+    deleteBtn.innerHTML = '×';
+    deleteBtn.title = 'Delete template';
+    deleteBtn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      deleteTemplate(template.id);
+    });
+    actions.appendChild(deleteBtn);
+  }
+
+  // Insert button (for all templates)
   const insertBtn = document.createElement('button');
   insertBtn.className = 'template-insert-btn';
   insertBtn.textContent = 'Use';
@@ -185,19 +236,6 @@ function createTemplateItem(template, showDelete = false) {
     insertTemplate(template);
   });
   actions.appendChild(insertBtn);
-
-  // Delete button (for custom templates)
-  if (showDelete) {
-    const deleteBtn = document.createElement('button');
-    deleteBtn.className = 'template-delete-btn';
-    deleteBtn.innerHTML = '&times;';
-    deleteBtn.title = 'Delete template';
-    deleteBtn.addEventListener('click', (e) => {
-      e.stopPropagation();
-      deleteTemplate(template.id);
-    });
-    actions.appendChild(deleteBtn);
-  }
 
   item.appendChild(actions);
 
@@ -361,6 +399,95 @@ function saveTemplate(template) {
 }
 
 /**
+ * Show edit template dialog
+ */
+function showEditTemplateDialog(template) {
+  const dialog = document.createElement('div');
+  dialog.className = 'template-dialog-overlay';
+  dialog.innerHTML = `
+    <div class="template-dialog">
+      <div class="template-dialog-header">
+        <h3>Edit Template</h3>
+        <button class="template-dialog-close">&times;</button>
+      </div>
+      <div class="template-dialog-body">
+        <div class="form-group">
+          <label>Name</label>
+          <input type="text" class="template-name-input" placeholder="Template name" value="${escapeHtml(template.name)}" />
+        </div>
+        <div class="form-group">
+          <label>Description</label>
+          <input type="text" class="template-desc-input" placeholder="Brief description" value="${escapeHtml(template.description || '')}" />
+        </div>
+        <div class="form-group">
+          <label>Prompt</label>
+          <textarea class="template-prompt-input" rows="8" placeholder="Enter your prompt template...">${escapeHtml(template.prompt)}</textarea>
+        </div>
+      </div>
+      <div class="template-dialog-footer">
+        <button class="btn-cancel">Cancel</button>
+        <button class="btn-save">Save Changes</button>
+      </div>
+    </div>
+  `;
+
+  document.body.appendChild(dialog);
+
+  dialog.querySelector('.template-dialog-close').addEventListener('click', () => {
+    dialog.remove();
+  });
+
+  dialog.querySelector('.btn-cancel').addEventListener('click', () => {
+    dialog.remove();
+  });
+
+  dialog.querySelector('.btn-save').addEventListener('click', () => {
+    const name = dialog.querySelector('.template-name-input').value.trim();
+    const description = dialog.querySelector('.template-desc-input').value.trim();
+    const prompt = dialog.querySelector('.template-prompt-input').value;
+
+    if (!name || !prompt) {
+      alert('Please enter a name and prompt for the template.');
+      return;
+    }
+
+    // Update template with same ID
+    updateTemplate({
+      id: template.id,
+      name,
+      description,
+      prompt,
+      icon: template.icon || 'star'
+    });
+    dialog.remove();
+  });
+
+  // Close on overlay click
+  dialog.addEventListener('click', (e) => {
+    if (e.target === dialog) {
+      dialog.remove();
+    }
+  });
+
+  // Focus name input
+  dialog.querySelector('.template-name-input').focus();
+}
+
+/**
+ * Update an existing template
+ */
+function updateTemplate(template) {
+  ipcRenderer.send(IPC.UPDATE_TEMPLATE, template);
+}
+
+/**
+ * Move template up or down
+ */
+function moveTemplate(templateId, direction) {
+  ipcRenderer.send(IPC.MOVE_TEMPLATE, { templateId, direction });
+}
+
+/**
  * Delete a template
  */
 function deleteTemplate(templateId) {
@@ -392,6 +519,11 @@ function setupIPC() {
  * Show panel
  */
 function show() {
+  // Close other right-side panels for mutual exclusivity
+  if (window.closeOtherRightPanels) {
+    window.closeOtherRightPanels('templates');
+  }
+
   if (panelElement) {
     panelElement.classList.remove('panel-hidden');
     isVisible = true;

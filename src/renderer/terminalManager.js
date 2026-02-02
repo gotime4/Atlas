@@ -548,11 +548,28 @@ class TerminalManager {
    */
   sendCommand(command, terminalId = null) {
     const targetId = terminalId || this.activeTerminalId;
-    
+
     if (targetId) {
       ipcRenderer.send(IPC.TERMINAL_INPUT_ID, {
         terminalId: targetId,
         data: command + '\r'
+      });
+    }
+  }
+
+  /**
+   * Send input text to terminal without pressing Enter
+   * Useful for inserting text that user can review/edit before submitting
+   * @param {string} text - Text to insert
+   * @param {string} [terminalId] - Optional specific terminal ID
+   */
+  sendInput(text, terminalId = null) {
+    const targetId = terminalId || this.activeTerminalId;
+
+    if (targetId) {
+      ipcRenderer.send(IPC.TERMINAL_INPUT_ID, {
+        terminalId: targetId,
+        data: text
       });
     }
   }

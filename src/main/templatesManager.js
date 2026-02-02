@@ -163,6 +163,36 @@ function deleteTemplate(templateId) {
 }
 
 /**
+ * Move template up or down in the list
+ */
+function moveTemplate(templateId, direction) {
+  ensureSettingsDir();
+  try {
+    let customTemplates = [];
+    if (fs.existsSync(TEMPLATES_FILE)) {
+      customTemplates = JSON.parse(fs.readFileSync(TEMPLATES_FILE, 'utf8'));
+    }
+
+    const index = customTemplates.findIndex(t => t.id === templateId);
+    if (index === -1) return false;
+
+    const newIndex = direction === 'up' ? index - 1 : index + 1;
+    if (newIndex < 0 || newIndex >= customTemplates.length) return false;
+
+    // Swap templates
+    const temp = customTemplates[index];
+    customTemplates[index] = customTemplates[newIndex];
+    customTemplates[newIndex] = temp;
+
+    fs.writeFileSync(TEMPLATES_FILE, JSON.stringify(customTemplates, null, 2), 'utf8');
+    return true;
+  } catch (err) {
+    console.error('Error moving template:', err);
+    return false;
+  }
+}
+
+/**
  * Initialize module with window reference
  */
 function init(window) {
@@ -198,6 +228,26 @@ function setupIPC(ipcMain) {
       event.sender.send(IPC.TEMPLATES_DATA, templates);
     }
   });
+
+  // Update template
+  ipcMain.on(IPC.UPDATE_TEMPLATE, (event, template) => {
+    const saved = saveTemplate(template);
+    if (saved) {
+      const templates = loadTemplates();
+      event.sender.send(IPC.TEMPLATE_SAVED, { success: true, template: saved, templates });
+    } else {
+      event.sender.send(IPC.TEMPLATE_SAVED, { success: false });
+    }
+  });
+
+  // Move template up/down
+  ipcMain.on(IPC.MOVE_TEMPLATE, (event, { templateId, direction }) => {
+    const success = moveTemplate(templateId, direction);
+    if (success) {
+      const templates = loadTemplates();
+      event.sender.send(IPC.TEMPLATES_DATA, templates);
+    }
+  });
 }
 
 module.exports = {
@@ -205,5 +255,6 @@ module.exports = {
   setupIPC,
   loadTemplates,
   saveTemplate,
-  deleteTemplate
+  deleteTemplate,
+  moveTemplate
 };

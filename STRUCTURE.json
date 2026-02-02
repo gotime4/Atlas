@@ -1,7 +1,7 @@
 {
   "version": "1.0",
   "description": "Claude Code IDE - Module structure and IPC communication map",
-  "lastUpdated": "2026-02-01",
+  "lastUpdated": "2026-02-02",
   "architecture": {
     "type": "electron",
     "mainProcess": "src/main/index.js",
@@ -36,23 +36,26 @@
         "templatesManager",
         "gitManager",
         "agentsManager",
-        "skillsManager"
+        "skillsManager",
+        "mcpManager",
+        "diffManager",
+        "contextManager"
       ],
       "functions": {
         "createWindow": {
-          "line": 35,
+          "line": 38,
           "purpose": "Create main application window"
         },
         "setupAllIPC": {
-          "line": 78,
+          "line": 81,
           "purpose": "Setup all IPC handlers"
         },
         "init": {
-          "line": 108,
+          "line": 114,
           "purpose": "Initialize application"
         },
         "initModulesWithWindow": {
-          "line": 119,
+          "line": 125,
           "params": [
             "window"
           ],
@@ -467,7 +470,7 @@
     },
     "main/frameProject": {
       "file": "src/main/frameProject.js",
-      "description": "F",
+      "description": "A",
       "exports": [
         "init",
         "isFrameProject",
@@ -490,14 +493,14 @@
           "params": [
             "window"
           ],
-          "purpose": "Initialize frame project module"
+          "purpose": "Initialize atlas project module"
         },
         "isFrameProject": {
           "line": 26,
           "params": [
             "projectPath"
           ],
-          "purpose": "Check if a project is a Frame project"
+          "purpose": "Check if a project is an Atlas project"
         },
         "getFrameConfig": {
           "line": 34,
@@ -519,25 +522,40 @@
           "params": [
             "projectPath"
           ],
-          "purpose": "Check which Frame files already exist in the project"
+          "purpose": "Check which Atlas files already exist in the project"
         },
-        "showInitializeConfirmation": {
+        "checkGitignore": {
           "line": 84,
           "params": [
             "projectPath"
           ],
-          "purpose": "Show confirmation dialog before initializing Frame project"
+          "purpose": "Check if .gitignore exists and if Atlas files are already in it"
+        },
+        "addToGitignore": {
+          "line": 100,
+          "params": [
+            "projectPath",
+            "createNew = false"
+          ],
+          "purpose": "Add Atlas entries to .gitignore"
+        },
+        "showInitializeConfirmation": {
+          "line": 122,
+          "params": [
+            "projectPath"
+          ],
+          "purpose": "Show confirmation dialog before initializing Atlas project"
         },
         "initializeFrameProject": {
-          "line": 118,
+          "line": 183,
           "params": [
             "projectPath",
             "projectName"
           ],
-          "purpose": "Initialize a project as Frame project"
+          "purpose": "Initialize a project as Atlas project"
         },
         "setupIPC": {
-          "line": 172,
+          "line": 237,
           "params": [
             "ipcMain"
           ],
@@ -724,25 +742,35 @@
         "templatesPanel",
         "sessionUI",
         "agentsPanel",
-        "skillsPanel"
+        "skillsPanel",
+        "mcpPanel",
+        "diffPanel",
+        "contextPanel"
       ],
       "functions": {
         "init": {
-          "line": 25,
+          "line": 28,
           "purpose": "Initialize all modules"
         },
+        "closeOtherRightPanels": {
+          "line": 185,
+          "params": [
+            "exceptPanel"
+          ],
+          "purpose": "Used for mutual exclusivity between panels"
+        },
         "setupButtonHandlers": {
-          "line": 166,
+          "line": 203,
           "purpose": "Setup button click handlers"
         },
         "setupKeyboardShortcuts": {
-          "line": 219,
+          "line": 256,
           "purpose": "Setup keyboard shortcuts"
         }
       }
     },
     "renderer/terminal": {
-      "file": "src\\renderer\\terminal.js",
+      "file": "src/renderer/terminal.js",
       "description": "T",
       "exports": [
         "initTerminal",
@@ -753,6 +781,7 @@
         "startTerminal",
         "restartTerminal",
         "sendCommand",
+        "sendInput",
         "setActiveTerminal",
         "getMultiTerminalUI"
       ],
@@ -810,15 +839,23 @@
           ],
           "purpose": "Send command to active terminal or specific terminal"
         },
+        "sendInput": {
+          "line": 91,
+          "params": [
+            "text",
+            "terminalId = null"
+          ],
+          "purpose": "Useful for inserting templates that user can review/edit"
+        },
         "setActiveTerminal": {
-          "line": 90,
+          "line": 100,
           "params": [
             "terminalId"
           ],
           "purpose": "Set active terminal"
         },
         "getMultiTerminalUI": {
-          "line": 122,
+          "line": 135,
           "purpose": "Get MultiTerminalUI instance"
         }
       },
@@ -946,6 +983,8 @@
       "exports": [
         "init",
         "isHistoryVisible",
+        "isVisible",
+        "hide",
         "toggleHistoryPanel",
         "showHistoryPanel",
         "hideHistoryPanel",
@@ -973,27 +1012,35 @@
           "line": 35,
           "purpose": "Toggle history panel visibility"
         },
+        "isVisible": {
+          "line": 60,
+          "purpose": "Check if history panel is visible (for panel manager)"
+        },
+        "hide": {
+          "line": 67,
+          "purpose": "Hide history panel (for panel manager)"
+        },
         "showHistoryPanel": {
-          "line": 56,
+          "line": 80,
           "purpose": "Show history panel"
         },
         "hideHistoryPanel": {
-          "line": 65,
+          "line": 89,
           "purpose": "Hide history panel"
         },
         "loadPromptHistory": {
-          "line": 74,
+          "line": 98,
           "purpose": "Load prompt history from file"
         },
         "renderPromptHistory": {
-          "line": 81,
+          "line": 105,
           "params": [
             "historyData"
           ],
           "purpose": "Render prompt history data"
         },
         "setupIPC": {
-          "line": 119,
+          "line": 143,
           "purpose": "Setup IPC listeners"
         }
       },
@@ -1573,6 +1620,7 @@
           "TERMINAL_INPUT_ID",
           "TERMINAL_DESTROY",
           "TERMINAL_INPUT_ID",
+          "TERMINAL_INPUT_ID",
           "TERMINAL_RESIZE_ID"
         ]
       }
@@ -1952,7 +2000,11 @@
         "pluginsPanel",
         "githubPanel",
         "agentsPanel",
-        "skillsPanel"
+        "skillsPanel",
+        "mcpPanel",
+        "diffPanel",
+        "contextPanel",
+        "templatesPanel"
       ],
       "functions": {}
     },
@@ -2086,58 +2138,58 @@
           "purpose": "Show plugins panel"
         },
         "hide": {
-          "line": 150,
+          "line": 155,
           "purpose": "Hide plugins panel"
         },
         "toggle": {
-          "line": 160,
+          "line": 165,
           "purpose": "Toggle plugins panel visibility"
         },
         "setFilter": {
-          "line": 171,
+          "line": 176,
           "params": [
             "filter"
           ],
           "purpose": "Set filter"
         },
         "getFilteredPlugins": {
-          "line": 185,
+          "line": 190,
           "purpose": "Get filtered plugins"
         },
         "render": {
-          "line": 201,
+          "line": 206,
           "purpose": "Render plugins list"
         },
         "renderPluginItem": {
-          "line": 245,
+          "line": 250,
           "params": [
             "plugin"
           ],
           "purpose": "Render single plugin item"
         },
         "getPluginIcon": {
-          "line": 291,
+          "line": 296,
           "params": [
             "name"
           ],
           "purpose": "Get icon for plugin based on name"
         },
         "togglePlugin": {
-          "line": 330,
+          "line": 335,
           "params": [
             "pluginId"
           ],
           "purpose": "Toggle plugin enabled/disabled"
         },
         "installPlugin": {
-          "line": 342,
+          "line": 347,
           "params": [
             "pluginName"
           ],
           "purpose": "Install plugin via terminal command"
         },
         "showToast": {
-          "line": 359,
+          "line": 368,
           "params": [
             "message",
             "type = 'info'"
@@ -2145,14 +2197,14 @@
           "purpose": "Show toast notification"
         },
         "getToastIcon": {
-          "line": 394,
+          "line": 403,
           "params": [
             "type"
           ],
           "purpose": "Get toast icon based on type"
         },
         "escapeHtml": {
-          "line": 408,
+          "line": 417,
           "params": [
             "text"
           ],
@@ -2728,7 +2780,8 @@
         "setupIPC",
         "loadTemplates",
         "saveTemplate",
-        "deleteTemplate"
+        "deleteTemplate",
+        "moveTemplate"
       ],
       "depends": [
         "fs",
@@ -2759,15 +2812,23 @@
           ],
           "purpose": "Delete custom template"
         },
-        "init": {
+        "moveTemplate": {
           "line": 168,
+          "params": [
+            "templateId",
+            "direction"
+          ],
+          "purpose": "Move template up or down in the list"
+        },
+        "init": {
+          "line": 198,
           "params": [
             "window"
           ],
           "purpose": "Initialize module with window reference"
         },
         "setupIPC": {
-          "line": 175,
+          "line": 205,
           "params": [
             "ipcMain"
           ],
@@ -2778,7 +2839,9 @@
         "listens": [
           "LOAD_TEMPLATES",
           "SAVE_TEMPLATE",
-          "DELETE_TEMPLATE"
+          "DELETE_TEMPLATE",
+          "UPDATE_TEMPLATE",
+          "MOVE_TEMPLATE"
         ],
         "emits": [
           "TEMPLATES_DATA",
@@ -2914,7 +2977,7 @@
           "params": [
             "title",
             "sectionTemplates",
-            "showDelete = false"
+            "isCustomSection = false"
           ],
           "purpose": "Create a section with templates"
         },
@@ -2922,71 +2985,95 @@
           "line": 147,
           "params": [
             "template",
-            "showDelete = false"
+            "isCustom = false",
+            "index = 0",
+            "totalCustom = 0"
           ],
           "purpose": "Create a template item element"
         },
         "insertTemplate": {
-          "line": 215,
+          "line": 253,
           "params": [
             "template"
           ],
           "purpose": "Insert template into terminal"
         },
         "showTemplatePreview": {
-          "line": 226,
+          "line": 264,
           "params": [
             "template"
           ],
           "purpose": "Show template preview"
         },
         "filterTemplates": {
-          "line": 272,
+          "line": 310,
           "params": [
             "query"
           ],
           "purpose": "Filter templates by search query"
         },
         "showCreateTemplateDialog": {
-          "line": 291,
+          "line": 329,
           "purpose": "Show create template dialog"
         },
         "saveTemplate": {
-          "line": 359,
+          "line": 397,
           "params": [
             "template"
           ],
           "purpose": "Save a custom template"
         },
+        "showEditTemplateDialog": {
+          "line": 404,
+          "params": [
+            "template"
+          ],
+          "purpose": "Show edit template dialog"
+        },
+        "updateTemplate": {
+          "line": 479,
+          "params": [
+            "template"
+          ],
+          "purpose": "Update an existing template"
+        },
+        "moveTemplate": {
+          "line": 486,
+          "params": [
+            "templateId",
+            "direction"
+          ],
+          "purpose": "Move template up or down"
+        },
         "deleteTemplate": {
-          "line": 366,
+          "line": 493,
           "params": [
             "templateId"
           ],
           "purpose": "Delete a template"
         },
         "setupIPC": {
-          "line": 375,
+          "line": 502,
           "purpose": "Setup IPC listeners"
         },
         "show": {
-          "line": 394,
+          "line": 521,
           "purpose": "Show panel"
         },
         "hide": {
-          "line": 405,
+          "line": 537,
           "purpose": "Hide panel"
         },
         "toggle": {
-          "line": 415,
+          "line": 547,
           "purpose": "Toggle panel visibility"
         },
         "isVisibleState": {
-          "line": 426,
+          "line": 558,
           "purpose": "Check if panel is visible"
         },
         "escapeHtml": {
-          "line": 433,
+          "line": 565,
           "params": [
             "str"
           ],
@@ -3002,6 +3089,8 @@
         "emits": [
           "LOAD_TEMPLATES",
           "SAVE_TEMPLATE",
+          "UPDATE_TEMPLATE",
+          "MOVE_TEMPLATE",
           "DELETE_TEMPLATE"
         ]
       }
@@ -3090,7 +3179,8 @@
         "init",
         "setupIPC",
         "loadAgents",
-        "saveAgent"
+        "saveAgent",
+        "createAgent"
       ],
       "depends": [
         "fs",
@@ -3135,8 +3225,18 @@
           ],
           "purpose": "Save agent content"
         },
-        "setupIPC": {
+        "createAgent": {
           "line": 185,
+          "params": [
+            "name",
+            "content",
+            "scope",
+            "projectPath"
+          ],
+          "purpose": "Create a new agent"
+        },
+        "setupIPC": {
+          "line": 223,
           "params": [
             "ipcMain"
           ],
@@ -3146,11 +3246,13 @@
       "ipc": {
         "listens": [
           "LOAD_AGENTS",
-          "SAVE_AGENT"
+          "SAVE_AGENT",
+          "CREATE_AGENT"
         ],
         "emits": [
           "AGENTS_DATA",
-          "AGENT_SAVED"
+          "AGENT_SAVED",
+          "AGENT_CREATED"
         ]
       }
     },
@@ -3161,7 +3263,8 @@
         "init",
         "setupIPC",
         "loadSkills",
-        "saveSkill"
+        "saveSkill",
+        "createSkill"
       ],
       "depends": [
         "fs",
@@ -3206,8 +3309,18 @@
           ],
           "purpose": "Save skill content"
         },
-        "setupIPC": {
+        "createSkill": {
           "line": 204,
+          "params": [
+            "name",
+            "content",
+            "scope",
+            "projectPath"
+          ],
+          "purpose": "Create a new skill"
+        },
+        "setupIPC": {
+          "line": 242,
           "params": [
             "ipcMain"
           ],
@@ -3217,11 +3330,13 @@
       "ipc": {
         "listens": [
           "LOAD_SKILLS",
-          "SAVE_SKILL"
+          "SAVE_SKILL",
+          "CREATE_SKILL"
         ],
         "emits": [
           "SKILLS_DATA",
-          "SKILL_SAVED"
+          "SKILL_SAVED",
+          "SKILL_CREATED"
         ]
       }
     },
@@ -3241,63 +3356,75 @@
       ],
       "functions": {
         "init": {
-          "line": 21,
+          "line": 22,
           "purpose": "Initialize agents panel"
         },
         "setupPanelEvents": {
-          "line": 31,
+          "line": 32,
           "purpose": "Setup panel event handlers"
         },
+        "toggleCreateForm": {
+          "line": 61,
+          "purpose": "Toggle create form visibility"
+        },
         "toggle": {
-          "line": 48,
+          "line": 72,
           "purpose": "Toggle panel visibility"
         },
         "isVisible": {
-          "line": 66,
+          "line": 90,
           "purpose": "Check if panel is visible"
         },
         "setProjectPath": {
-          "line": 73,
+          "line": 97,
           "params": [
             "projectPath"
           ],
           "purpose": "Set current project path"
         },
         "loadAgents": {
-          "line": 83,
+          "line": 107,
           "purpose": "Load agents from main process"
         },
         "renderAgents": {
-          "line": 92,
+          "line": 116,
           "purpose": "Render agents list"
         },
+        "createAgentForm": {
+          "line": 152,
+          "purpose": "Create the agent creation form"
+        },
+        "saveNewAgent": {
+          "line": 229,
+          "purpose": "Save new agent"
+        },
         "createAgentItem": {
-          "line": 116,
+          "line": 271,
           "params": [
             "agent"
           ],
           "purpose": "Create an agent item element"
         },
         "toggleAgent": {
-          "line": 194,
+          "line": 349,
           "params": [
             "agent"
           ],
           "purpose": "Toggle agent expansion"
         },
         "saveCurrentIfChanged": {
-          "line": 220,
+          "line": 375,
           "purpose": "Save current agent if changed"
         },
         "extractDescription": {
-          "line": 240,
+          "line": 395,
           "params": [
             "content"
           ],
           "purpose": "Extract description from content (handles YAML frontmatter)"
         },
         "updateSaveIndicator": {
-          "line": 275,
+          "line": 430,
           "params": [
             "item",
             "unsaved"
@@ -3305,24 +3432,26 @@
           "purpose": "Update save indicator"
         },
         "getScopeIcon": {
-          "line": 287,
+          "line": 442,
           "params": [
             "scope"
           ],
           "purpose": "Get scope icon"
         },
         "setupIPC": {
-          "line": 300
+          "line": 455
         }
       },
       "ipc": {
         "listens": [
           "AGENTS_DATA",
           "AGENT_SAVED",
-          "TOGGLE_AGENTS_PANEL"
+          "TOGGLE_AGENTS_PANEL",
+          "AGENT_CREATED"
         ],
         "emits": [
           "LOAD_AGENTS",
+          "CREATE_AGENT",
           "SAVE_AGENT"
         ]
       }
@@ -3343,63 +3472,75 @@
       ],
       "functions": {
         "init": {
-          "line": 21,
+          "line": 22,
           "purpose": "Initialize skills panel"
         },
         "setupPanelEvents": {
-          "line": 31,
+          "line": 32,
           "purpose": "Setup panel event handlers"
         },
+        "toggleCreateForm": {
+          "line": 61,
+          "purpose": "Toggle create form visibility"
+        },
         "toggle": {
-          "line": 48,
+          "line": 72,
           "purpose": "Toggle panel visibility"
         },
         "isVisible": {
-          "line": 66,
+          "line": 90,
           "purpose": "Check if panel is visible"
         },
         "setProjectPath": {
-          "line": 73,
+          "line": 97,
           "params": [
             "projectPath"
           ],
           "purpose": "Set current project path"
         },
         "loadSkills": {
-          "line": 83,
+          "line": 107,
           "purpose": "Load skills from main process"
         },
         "renderSkills": {
-          "line": 92,
+          "line": 116,
           "purpose": "Render skills list"
         },
+        "createSkillForm": {
+          "line": 152,
+          "purpose": "Create the skill creation form"
+        },
+        "saveNewSkill": {
+          "line": 225,
+          "purpose": "Save new skill"
+        },
         "createSkillItem": {
-          "line": 116,
+          "line": 267,
           "params": [
             "skill"
           ],
           "purpose": "Create a skill item element"
         },
         "toggleSkill": {
-          "line": 194,
+          "line": 345,
           "params": [
             "skill"
           ],
           "purpose": "Toggle skill expansion"
         },
         "saveCurrentIfChanged": {
-          "line": 220,
+          "line": 371,
           "purpose": "Save current skill if changed"
         },
         "extractDescription": {
-          "line": 240,
+          "line": 391,
           "params": [
             "content"
           ],
           "purpose": "Extract description from content (handles YAML frontmatter)"
         },
         "updateSaveIndicator": {
-          "line": 275,
+          "line": 426,
           "params": [
             "item",
             "unsaved"
@@ -3407,25 +3548,820 @@
           "purpose": "Update save indicator"
         },
         "getScopeIcon": {
-          "line": 287,
+          "line": 438,
           "params": [
             "scope"
           ],
           "purpose": "Get scope icon"
         },
         "setupIPC": {
-          "line": 300
+          "line": 451
         }
       },
       "ipc": {
         "listens": [
           "SKILLS_DATA",
           "SKILL_SAVED",
-          "TOGGLE_SKILLS_PANEL"
+          "TOGGLE_SKILLS_PANEL",
+          "SKILL_CREATED"
         ],
         "emits": [
           "LOAD_SKILLS",
+          "CREATE_SKILL",
           "SAVE_SKILL"
+        ]
+      }
+    },
+    "main/contextManager": {
+      "file": "src/main/contextManager.js",
+      "description": "C",
+      "exports": [
+        "init",
+        "setupIPC",
+        "loadContext",
+        "pinFile",
+        "unpinFile",
+        "getContextUsage",
+        "getSuggestedFiles",
+        "estimateTokens"
+      ],
+      "depends": [
+        "fs",
+        "path",
+        "os",
+        "shared/ipcChannels"
+      ],
+      "functions": {
+        "init": {
+          "line": 41,
+          "params": [
+            "window"
+          ],
+          "purpose": "Initialize module"
+        },
+        "projectPathToClaudeDir": {
+          "line": 49,
+          "params": [
+            "projectPath"
+          ],
+          "purpose": "e.g., /Users/ryan/vega/vega-web -> -Users-ryan-vega-vega-web"
+        },
+        "findActiveSessionFile": {
+          "line": 57,
+          "params": [
+            "projectPath"
+          ],
+          "purpose": "Returns the most recently modified .jsonl file"
+        },
+        "countMessageTokens": {
+          "line": 83,
+          "params": [
+            "sessionFile"
+          ],
+          "purpose": "Count message tokens from Claude conversation file"
+        },
+        "getContextFilePath": {
+          "line": 131,
+          "params": [
+            "projectPath"
+          ],
+          "purpose": "Get context file path for a project"
+        },
+        "loadContext": {
+          "line": 138,
+          "params": [
+            "projectPath"
+          ],
+          "purpose": "Load context for a project"
+        },
+        "getDefaultContext": {
+          "line": 166,
+          "purpose": "Get default context structure"
+        },
+        "saveContext": {
+          "line": 185,
+          "params": [
+            "projectPath",
+            "context"
+          ],
+          "purpose": "Save context for a project"
+        },
+        "pinFile": {
+          "line": 208,
+          "params": [
+            "projectPath",
+            "filePath"
+          ],
+          "purpose": "Pin a file to context"
+        },
+        "unpinFile": {
+          "line": 237,
+          "params": [
+            "projectPath",
+            "filePath"
+          ],
+          "purpose": "Unpin a file from context"
+        },
+        "getFileInfo": {
+          "line": 252,
+          "params": [
+            "filePath"
+          ],
+          "purpose": "Get file info including token estimate"
+        },
+        "estimateTokens": {
+          "line": 275,
+          "params": [
+            "content"
+          ],
+          "purpose": "Estimate token count for content"
+        },
+        "getContextUsage": {
+          "line": 286,
+          "params": [
+            "projectPath"
+          ],
+          "purpose": "Get total context usage - matches Claude Code's /context breakdown"
+        },
+        "getDirectoryTokens": {
+          "line": 393,
+          "params": [
+            "dirPath"
+          ],
+          "purpose": "Get total tokens for all .md files in a directory"
+        },
+        "getMemoryFiles": {
+          "line": 418,
+          "params": [
+            "projectPath"
+          ],
+          "purpose": "Claude Code loads CLAUDE.md from: user home, parent dirs, and project"
+        },
+        "getSkillsTokens": {
+          "line": 466,
+          "params": [
+            "dirPath"
+          ],
+          "purpose": "Skills are lightweight command definitions, not full content"
+        },
+        "estimateMcpTokens": {
+          "line": 491,
+          "params": [
+            "claudeConfig",
+            "projectPath"
+          ],
+          "purpose": "Different MCPs have different numbers of tools"
+        },
+        "updateExcludedPatterns": {
+          "line": 558,
+          "params": [
+            "projectPath",
+            "patterns"
+          ],
+          "purpose": "Update excluded patterns"
+        },
+        "updateContextSettings": {
+          "line": 567,
+          "params": [
+            "projectPath",
+            "settings"
+          ],
+          "purpose": "Update context limit/model"
+        },
+        "getSuggestedFiles": {
+          "line": 584,
+          "params": [
+            "projectPath"
+          ],
+          "purpose": "Get suggested files to pin based on project structure"
+        },
+        "getFileReason": {
+          "line": 618,
+          "params": [
+            "filename"
+          ],
+          "purpose": "Get reason why a file is suggested"
+        },
+        "generateContextSummary": {
+          "line": 633,
+          "params": [
+            "projectPath"
+          ],
+          "purpose": "Generate context summary for Claude"
+        },
+        "setupIPC": {
+          "line": 653,
+          "params": [
+            "ipcMain"
+          ],
+          "purpose": "Setup IPC handlers"
+        }
+      },
+      "ipc": {
+        "listens": [
+          "LOAD_CONTEXT",
+          "GET_CONTEXT_USAGE",
+          "PIN_FILE",
+          "UNPIN_FILE",
+          "GET_FILE_TOKENS",
+          "GET_SUGGESTED_FILES",
+          "UPDATE_CONTEXT_SETTINGS",
+          "GENERATE_CONTEXT_SUMMARY"
+        ],
+        "emits": []
+      }
+    },
+    "main/diffManager": {
+      "file": "src/main/diffManager.js",
+      "description": "D",
+      "exports": [
+        "init",
+        "setupIPC",
+        "watchProject",
+        "snapshotFile",
+        "snapshotDirectory",
+        "getPendingChanges",
+        "getFileDiff",
+        "acceptChanges",
+        "revertChanges",
+        "stopWatching"
+      ],
+      "depends": [
+        "fs",
+        "path",
+        "shared/ipcChannels"
+      ],
+      "functions": {
+        "init": {
+          "line": 18,
+          "params": [
+            "window"
+          ],
+          "purpose": "Initialize module"
+        },
+        "watchProject": {
+          "line": 25,
+          "params": [
+            "projectPath"
+          ],
+          "purpose": "Start watching a project directory for file changes"
+        },
+        "shouldIgnoreFile": {
+          "line": 55,
+          "params": [
+            "filename"
+          ],
+          "purpose": "Check if file should be ignored"
+        },
+        "handleFileChange": {
+          "line": 78,
+          "params": [
+            "filePath"
+          ],
+          "purpose": "Handle file change event"
+        },
+        "snapshotFile": {
+          "line": 122,
+          "params": [
+            "filePath"
+          ],
+          "purpose": "Take a snapshot of a file (for tracking changes)"
+        },
+        "snapshotDirectory": {
+          "line": 138,
+          "params": [
+            "dirPath",
+            "depth = 0"
+          ],
+          "purpose": "Take snapshots of all files in a directory"
+        },
+        "generateDiff": {
+          "line": 163,
+          "params": [
+            "oldContent",
+            "newContent"
+          ],
+          "purpose": "Generate a simple line-by-line diff"
+        },
+        "computeLCS": {
+          "line": 231,
+          "params": [
+            "oldLines",
+            "newLines"
+          ],
+          "purpose": "Compute Longest Common Subsequence for diff"
+        },
+        "getPendingChanges": {
+          "line": 270,
+          "purpose": "Get all pending changes"
+        },
+        "getFileDiff": {
+          "line": 277,
+          "params": [
+            "filePath"
+          ],
+          "purpose": "Get diff for a specific file"
+        },
+        "acceptChanges": {
+          "line": 284,
+          "params": [
+            "filePath"
+          ],
+          "purpose": "Accept changes (update snapshot to current)"
+        },
+        "revertChanges": {
+          "line": 297,
+          "params": [
+            "filePath"
+          ],
+          "purpose": "Revert changes (restore original content)"
+        },
+        "revertHunk": {
+          "line": 315,
+          "params": [
+            "filePath",
+            "hunkIndex"
+          ],
+          "purpose": "Revert a specific hunk"
+        },
+        "clearAllChanges": {
+          "line": 358,
+          "purpose": "Clear all pending changes (accept all)"
+        },
+        "stopWatching": {
+          "line": 369,
+          "purpose": "Stop watching files"
+        },
+        "setupIPC": {
+          "line": 379,
+          "params": [
+            "ipcMain"
+          ],
+          "purpose": "Setup IPC handlers"
+        }
+      },
+      "ipc": {
+        "listens": [
+          "GET_PENDING_CHANGES",
+          "GET_FILE_DIFF",
+          "ACCEPT_CHANGES",
+          "REVERT_CHANGES",
+          "REVERT_HUNK",
+          "CLEAR_ALL_CHANGES",
+          "WATCH_PROJECT",
+          "SNAPSHOT_FILE"
+        ],
+        "emits": [
+          "FILE_CHANGED"
+        ]
+      }
+    },
+    "main/mcpManager": {
+      "file": "src/main/mcpManager.js",
+      "description": "M",
+      "exports": [
+        "init",
+        "setupIPC",
+        "loadMcps",
+        "toggleMcp",
+        "addMcp",
+        "removeMcp",
+        "getMcpTemplates"
+      ],
+      "depends": [
+        "fs",
+        "path",
+        "os",
+        "shared/ipcChannels"
+      ],
+      "functions": {
+        "init": {
+          "line": 16,
+          "params": [
+            "window"
+          ],
+          "purpose": "Initialize module"
+        },
+        "getClaudeConfigPath": {
+          "line": 23,
+          "purpose": "Get the path to ~/.claude.json"
+        },
+        "readClaudeConfig": {
+          "line": 30,
+          "purpose": "Read ~/.claude.json"
+        },
+        "writeClaudeConfig": {
+          "line": 46,
+          "params": [
+            "config"
+          ],
+          "purpose": "Write ~/.claude.json"
+        },
+        "getMcpType": {
+          "line": 60,
+          "params": [
+            "mcpConfig"
+          ],
+          "purpose": "Get MCP type from config"
+        },
+        "getMcpIcon": {
+          "line": 71,
+          "params": [
+            "type"
+          ],
+          "purpose": "Get MCP icon based on type"
+        },
+        "loadMcps": {
+          "line": 84,
+          "params": [
+            "projectPath"
+          ],
+          "purpose": "Loads both enabled (in mcpServers) and disabled (in _disabledMcpServers) MCPs"
+        },
+        "toggleMcp": {
+          "line": 211,
+          "params": [
+            "mcpId",
+            "projectPath",
+            "enabled"
+          ],
+          "purpose": "Moves MCP between mcpServers (enabled) and _disabledMcpServers (disabled)"
+        },
+        "addMcp": {
+          "line": 280,
+          "params": [
+            "projectPath",
+            "name",
+            "mcpConfig",
+            "scope = 'project'"
+          ],
+          "purpose": "Add a new MCP"
+        },
+        "removeMcp": {
+          "line": 307,
+          "params": [
+            "mcpId",
+            "projectPath"
+          ],
+          "purpose": "Remove an MCP"
+        },
+        "getMcpTemplates": {
+          "line": 329,
+          "purpose": "Get MCP templates for common services"
+        },
+        "setupIPC": {
+          "line": 459,
+          "params": [
+            "ipcMain"
+          ],
+          "purpose": "Setup IPC handlers"
+        }
+      },
+      "ipc": {
+        "listens": [
+          "LOAD_MCPS",
+          "TOGGLE_MCP",
+          "ADD_MCP",
+          "REMOVE_MCP",
+          "GET_MCP_TEMPLATES"
+        ],
+        "emits": [
+          "MCPS_DATA",
+          "MCP_TOGGLED",
+          "MCP_ADDED",
+          "MCP_REMOVED",
+          "MCP_TEMPLATES_DATA"
+        ]
+      }
+    },
+    "renderer/contextPanel": {
+      "file": "src/renderer/contextPanel.js",
+      "description": "C",
+      "exports": [
+        "init",
+        "toggle",
+        "hide",
+        "isVisible",
+        "setProjectPath",
+        "loadContext"
+      ],
+      "depends": [
+        "electron",
+        "shared/ipcChannels"
+      ],
+      "functions": {
+        "init": {
+          "line": 19,
+          "purpose": "Initialize context panel"
+        },
+        "setupPanelEvents": {
+          "line": 29,
+          "purpose": "Setup panel event handlers"
+        },
+        "toggle": {
+          "line": 54,
+          "purpose": "Toggle panel visibility"
+        },
+        "hide": {
+          "line": 74,
+          "purpose": "Hide the panel"
+        },
+        "isVisible": {
+          "line": 83,
+          "purpose": "Check if panel is visible"
+        },
+        "setProjectPath": {
+          "line": 90,
+          "params": [
+            "projectPath"
+          ],
+          "purpose": "Set project path"
+        },
+        "loadContext": {
+          "line": 100,
+          "purpose": "Load context data"
+        },
+        "toggleSuggestions": {
+          "line": 115,
+          "purpose": "Toggle suggestions view"
+        },
+        "render": {
+          "line": 123,
+          "purpose": "Render the panel"
+        },
+        "renderTokenMeter": {
+          "line": 155,
+          "purpose": "Render token usage meter with breakdown"
+        },
+        "renderPinnedFiles": {
+          "line": 238,
+          "purpose": "Render pinned files list"
+        },
+        "renderSuggestions": {
+          "line": 279,
+          "purpose": "Render suggestions"
+        },
+        "setupItemEvents": {
+          "line": 336,
+          "purpose": "Setup item event handlers"
+        },
+        "pinFile": {
+          "line": 400,
+          "params": [
+            "filePath"
+          ],
+          "purpose": "Pin a file"
+        },
+        "unpinFile": {
+          "line": 420,
+          "params": [
+            "filePath"
+          ],
+          "purpose": "Unpin a file"
+        },
+        "formatTokens": {
+          "line": 438,
+          "params": [
+            "tokens"
+          ],
+          "purpose": "Format token count"
+        },
+        "escapeHtml": {
+          "line": 451,
+          "params": [
+            "text"
+          ],
+          "purpose": "Escape HTML"
+        },
+        "setupIPC": {
+          "line": 461
+        }
+      },
+      "ipc": {
+        "listens": [
+          "TOGGLE_CONTEXT_PANEL"
+        ],
+        "emits": []
+      }
+    },
+    "renderer/diffPanel": {
+      "file": "src/renderer/diffPanel.js",
+      "description": "D",
+      "exports": [
+        "init",
+        "toggle",
+        "isVisible",
+        "setProjectPath",
+        "loadChanges"
+      ],
+      "depends": [
+        "electron",
+        "shared/ipcChannels"
+      ],
+      "functions": {
+        "init": {
+          "line": 18,
+          "purpose": "Initialize diff panel"
+        },
+        "setupPanelEvents": {
+          "line": 28,
+          "purpose": "Setup panel event handlers"
+        },
+        "toggle": {
+          "line": 53,
+          "purpose": "Toggle panel visibility"
+        },
+        "isVisible": {
+          "line": 69,
+          "purpose": "Check if panel is visible"
+        },
+        "setProjectPath": {
+          "line": 76,
+          "params": [
+            "projectPath"
+          ],
+          "purpose": "Set project path and start watching"
+        },
+        "loadChanges": {
+          "line": 89,
+          "purpose": "Load pending changes"
+        },
+        "render": {
+          "line": 103,
+          "purpose": "Render the panel"
+        },
+        "renderDiffView": {
+          "line": 159,
+          "params": [
+            "change"
+          ],
+          "purpose": "Render diff view for a file"
+        },
+        "setupItemEvents": {
+          "line": 196,
+          "purpose": "Setup item event handlers"
+        },
+        "acceptChanges": {
+          "line": 242,
+          "params": [
+            "filePath"
+          ],
+          "purpose": "Accept changes for a file"
+        },
+        "revertChanges": {
+          "line": 259,
+          "params": [
+            "filePath"
+          ],
+          "purpose": "Revert changes for a file"
+        },
+        "revertHunk": {
+          "line": 276,
+          "params": [
+            "filePath",
+            "hunkIndex"
+          ],
+          "purpose": "Revert a specific hunk"
+        },
+        "acceptAllChanges": {
+          "line": 290,
+          "purpose": "Accept all changes"
+        },
+        "escapeHtml": {
+          "line": 305,
+          "params": [
+            "text"
+          ],
+          "purpose": "Escape HTML"
+        },
+        "setupIPC": {
+          "line": 315
+        },
+        "updateChangeBadge": {
+          "line": 335,
+          "purpose": "Update the change badge on the toolbar button"
+        }
+      },
+      "ipc": {
+        "listens": [
+          "FILE_CHANGED",
+          "TOGGLE_DIFF_PANEL"
+        ],
+        "emits": [
+          "WATCH_PROJECT"
+        ]
+      }
+    },
+    "renderer/mcpPanel": {
+      "file": "src/renderer/mcpPanel.js",
+      "description": "M",
+      "exports": [
+        "init",
+        "toggle",
+        "isVisible",
+        "setProjectPath",
+        "loadMcps"
+      ],
+      "depends": [
+        "electron",
+        "shared/ipcChannels"
+      ],
+      "functions": {
+        "init": {
+          "line": 20,
+          "purpose": "Initialize MCP panel"
+        },
+        "setupPanelEvents": {
+          "line": 30,
+          "purpose": "Setup panel event handlers"
+        },
+        "toggle": {
+          "line": 59,
+          "purpose": "Toggle panel visibility"
+        },
+        "isVisible": {
+          "line": 77,
+          "purpose": "Check if panel is visible"
+        },
+        "setProjectPath": {
+          "line": 84,
+          "params": [
+            "projectPath"
+          ],
+          "purpose": "Set current project path"
+        },
+        "loadMcps": {
+          "line": 94,
+          "purpose": "Load MCPs from main process"
+        },
+        "loadTemplates": {
+          "line": 101,
+          "purpose": "Load MCP templates"
+        },
+        "toggleAddForm": {
+          "line": 108,
+          "purpose": "Toggle add form visibility"
+        },
+        "renderMcps": {
+          "line": 116,
+          "purpose": "Render MCPs list"
+        },
+        "renderAddForm": {
+          "line": 149,
+          "purpose": "Render add form"
+        },
+        "createMcpItemHtml": {
+          "line": 214,
+          "params": [
+            "mcp"
+          ],
+          "purpose": "Create MCP item HTML"
+        },
+        "setupItemEvents": {
+          "line": 273,
+          "purpose": "Setup item event handlers"
+        },
+        "toggleMcp": {
+          "line": 358,
+          "params": [
+            "mcpId"
+          ],
+          "purpose": "Toggle MCP expansion"
+        },
+        "selectTemplate": {
+          "line": 370,
+          "params": [
+            "templateId"
+          ],
+          "purpose": "Select a template and show custom form"
+        },
+        "updateFormFields": {
+          "line": 402,
+          "purpose": "Update form fields based on type selection"
+        },
+        "saveMcp": {
+          "line": 414,
+          "purpose": "Save new MCP"
+        },
+        "setupIPC": {
+          "line": 462
+        }
+      },
+      "ipc": {
+        "listens": [
+          "MCPS_DATA",
+          "MCP_TEMPLATES_DATA",
+          "MCP_TOGGLED",
+          "MCP_ADDED",
+          "MCP_REMOVED",
+          "TOGGLE_MCP_PANEL"
+        ],
+        "emits": [
+          "LOAD_MCPS",
+          "GET_MCP_TEMPLATES",
+          "TOGGLE_MCP",
+          "REMOVE_MCP",
+          "ADD_MCP"
         ]
       }
     }

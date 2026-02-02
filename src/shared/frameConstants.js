@@ -3,14 +3,14 @@
  * Configuration constants for Frame project management
  */
 
-// Frame project folder name (inside each project)
-const FRAME_DIR = '.frame';
+// Atlas project folder name (inside each project)
+const FRAME_DIR = '.atlas';
 
 // Frame config file name
 const FRAME_CONFIG_FILE = 'config.json';
 
-// Workspace directory name (in user home: ~/.frame/)
-const WORKSPACE_DIR = '.frame';
+// Workspace directory name (in user home: ~/.atlas/)
+const WORKSPACE_DIR = '.atlas';
 
 // Workspace file name
 const WORKSPACE_FILE = 'workspaces.json';

@@ -107,7 +107,9 @@ const IPC = {
   LOAD_TEMPLATES: 'load-templates',
   TEMPLATES_DATA: 'templates-data',
   SAVE_TEMPLATE: 'save-template',
+  UPDATE_TEMPLATE: 'update-template',
   DELETE_TEMPLATE: 'delete-template',
+  MOVE_TEMPLATE: 'move-template',
   TEMPLATE_SAVED: 'template-saved',
   TOGGLE_TEMPLATES_PANEL: 'toggle-templates-panel',
 
@@ -121,6 +123,8 @@ const IPC = {
   AGENTS_DATA: 'agents-data',
   SAVE_AGENT: 'save-agent',
   AGENT_SAVED: 'agent-saved',
+  CREATE_AGENT: 'create-agent',
+  AGENT_CREATED: 'agent-created',
   TOGGLE_AGENTS_PANEL: 'toggle-agents-panel',
 
   // Skills Panel
@@ -128,7 +132,45 @@ const IPC = {
   SKILLS_DATA: 'skills-data',
   SAVE_SKILL: 'save-skill',
   SKILL_SAVED: 'skill-saved',
-  TOGGLE_SKILLS_PANEL: 'toggle-skills-panel'
+  CREATE_SKILL: 'create-skill',
+  SKILL_CREATED: 'skill-created',
+  TOGGLE_SKILLS_PANEL: 'toggle-skills-panel',
+
+  // Diff Panel
+  GET_PENDING_CHANGES: 'get-pending-changes',
+  GET_FILE_DIFF: 'get-file-diff',
+  ACCEPT_CHANGES: 'accept-changes',
+  REVERT_CHANGES: 'revert-changes',
+  REVERT_HUNK: 'revert-hunk',
+  CLEAR_ALL_CHANGES: 'clear-all-changes',
+  WATCH_PROJECT: 'watch-project',
+  SNAPSHOT_FILE: 'snapshot-file',
+  FILE_CHANGED: 'file-changed',
+  TOGGLE_DIFF_PANEL: 'toggle-diff-panel',
+
+  // Context Panel
+  LOAD_CONTEXT: 'load-context',
+  GET_CONTEXT_USAGE: 'get-context-usage',
+  PIN_FILE: 'pin-file',
+  UNPIN_FILE: 'unpin-file',
+  GET_FILE_TOKENS: 'get-file-tokens',
+  GET_SUGGESTED_FILES: 'get-suggested-files',
+  UPDATE_CONTEXT_SETTINGS: 'update-context-settings',
+  GENERATE_CONTEXT_SUMMARY: 'generate-context-summary',
+  TOGGLE_CONTEXT_PANEL: 'toggle-context-panel',
+
+  // MCP Panel
+  LOAD_MCPS: 'load-mcps',
+  MCPS_DATA: 'mcps-data',
+  TOGGLE_MCP: 'toggle-mcp',
+  MCP_TOGGLED: 'mcp-toggled',
+  ADD_MCP: 'add-mcp',
+  MCP_ADDED: 'mcp-added',
+  REMOVE_MCP: 'remove-mcp',
+  MCP_REMOVED: 'mcp-removed',
+  GET_MCP_TEMPLATES: 'get-mcp-templates',
+  MCP_TEMPLATES_DATA: 'mcp-templates-data',
+  TOGGLE_MCP_PANEL: 'toggle-mcp-panel'
 };
 
 module.exports = { IPC };

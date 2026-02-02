@@ -196,7 +196,7 @@ function getStructureTemplate(projectName) {
       purpose: "Project structure and module map for AI assistants",
       forClaude: "Read this file FIRST when starting work on this project. It contains the module structure, data flow, and conventions. Update this file when you add new modules or change the architecture.",
       lastUpdated: getDateString(),
-      generatedBy: "Frame"
+      generatedBy: "Atlas"
     },
     version: "1.0",
     description: `${projectName} - update this description`,
@@ -227,7 +227,7 @@ function getNotesTemplate(projectName) {
 ## Session Notes
 
 ### [${date}] Initial Setup
-- Frame project initialized
+- Atlas project initialized
 `;
 }
 
@@ -240,7 +240,7 @@ function getTasksTemplate(projectName) {
       purpose: "Task tracking for the project",
       forClaude: "Check this file to understand what tasks are pending, in progress, or completed. Update task status as you work. Add new tasks when discovered during development. Follow the task recognition rules in CLAUDE.md. IMPORTANT: Include userRequest (original user prompt), detailed description, and acceptanceCriteria for each task.",
       lastUpdated: getDateString(),
-      generatedBy: "Frame"
+      generatedBy: "Atlas"
     },
     project: projectName,
     version: "1.1",
@@ -328,7 +328,7 @@ npm test
 
 \`\`\`
 ${projectName}/
-├── .frame/           # Frame configuration
+├── .atlas/           # Atlas configuration
 ├── src/              # Source code
 └── ...
 \`\`\`
@@ -356,7 +356,7 @@ function getFrameConfigTemplate(projectName) {
     name: projectName,
     description: "",
     createdAt: getISOTimestamp(),
-    initializedBy: "Frame",
+    initializedBy: "Atlas",
     settings: {
       autoUpdateStructure: true,
       autoUpdateNotes: false,

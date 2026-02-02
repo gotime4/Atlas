@@ -18,6 +18,9 @@ const templatesPanel = require('./templatesPanel');
 const sessionUI = require('./sessionUI');
 const agentsPanel = require('./agentsPanel');
 const skillsPanel = require('./skillsPanel');
+const mcpPanel = require('./mcpPanel');
+const diffPanel = require('./diffPanel');
+const contextPanel = require('./contextPanel');
 
 /**
  * Initialize all modules
@@ -79,6 +82,15 @@ function init() {
   // Initialize skills panel
   skillsPanel.init();
 
+  // Initialize MCP panel
+  mcpPanel.init();
+
+  // Initialize diff panel
+  diffPanel.init();
+
+  // Initialize context panel
+  contextPanel.init();
+
   // Initialize sidebar resize
   sidebarResize.init(() => {
     terminal.fitTerminal();
@@ -87,9 +99,9 @@ function init() {
   // Initialize themes
   themesUI.init();
 
-  // Initialize templates panel with callback to insert into terminal
+  // Initialize templates panel with callback to insert into terminal input
   templatesPanel.init((promptText) => {
-    terminal.writeToTerminal(promptText);
+    terminal.sendInput(promptText);
   });
 
   // Initialize session management
@@ -124,9 +136,12 @@ function init() {
       // Refresh git status for the project
       projectListUI.requestGitStatus(projectPath);
 
-      // Update agents and skills panels with new project path
+      // Update agents, skills, and MCP panels with new project path
       agentsPanel.setProjectPath(projectPath);
       skillsPanel.setProjectPath(projectPath);
+      mcpPanel.setProjectPath(projectPath);
+      diffPanel.setProjectPath(projectPath);
+      contextPanel.setProjectPath(projectPath);
     } else {
       fileTreeUI.clearFileTree();
     }
@@ -158,6 +173,28 @@ function init() {
   window.addEventListener('resize', () => {
     terminal.fitTerminal();
   });
+
+  // Expose panel management globally for mutual exclusivity
+  window.closeOtherRightPanels = closeOtherRightPanels;
+}
+
+/**
+ * Close all right-side panels except the specified one
+ * Used for mutual exclusivity between panels
+ */
+function closeOtherRightPanels(exceptPanel) {
+  const rightPanels = {
+    templates: templatesPanel,
+    context: contextPanel,
+    plugins: pluginsPanel,
+    history: historyPanel
+  };
+
+  for (const [name, panel] of Object.entries(rightPanels)) {
+    if (name !== exceptPanel && panel.isVisible && panel.isVisible()) {
+      panel.hide();
+    }
+  }
 }
 
 /**
@@ -283,6 +320,21 @@ function setupKeyboardShortcuts() {
     if (modKey && e.shiftKey && key === 's') {
       e.preventDefault();
       skillsPanel.toggle();
+    }
+    // Ctrl/Cmd+Shift+M - Toggle MCP panel
+    if (modKey && e.shiftKey && key === 'm') {
+      e.preventDefault();
+      mcpPanel.toggle();
+    }
+    // Ctrl/Cmd+Shift+D - Toggle Diff panel
+    if (modKey && e.shiftKey && key === 'd') {
+      e.preventDefault();
+      diffPanel.toggle();
+    }
+    // Ctrl/Cmd+Shift+X - Toggle Context panel
+    if (modKey && e.shiftKey && key === 'x') {
+      e.preventDefault();
+      contextPanel.toggle();
     }
   });
 }

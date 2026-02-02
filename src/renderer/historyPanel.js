@@ -36,6 +36,10 @@ function toggleHistoryPanel() {
   historyVisible = !historyVisible;
 
   if (historyVisible) {
+    // Close other right-side panels for mutual exclusivity
+    if (window.closeOtherRightPanels) {
+      window.closeOtherRightPanels('history');
+    }
     historyPanel.classList.add('visible');
     loadPromptHistory();
   } else {
@@ -48,6 +52,26 @@ function toggleHistoryPanel() {
   }
 
   return historyVisible;
+}
+
+/**
+ * Check if history panel is visible (for panel manager)
+ */
+function isVisible() {
+  return historyVisible;
+}
+
+/**
+ * Hide history panel (for panel manager)
+ */
+function hide() {
+  if (historyVisible) {
+    historyVisible = false;
+    historyPanel.classList.remove('visible');
+    if (onToggleCallback) {
+      onToggleCallback(historyVisible);
+    }
+  }
 }
 
 /**
@@ -129,6 +153,8 @@ function setupIPC() {
 module.exports = {
   init,
   isHistoryVisible,
+  isVisible,
+  hide,
   toggleHistoryPanel,
   showHistoryPanel,
   hideHistoryPanel,

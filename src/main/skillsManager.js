@@ -199,6 +199,44 @@ function saveSkill(filePath, content) {
 }
 
 /**
+ * Create a new skill
+ */
+function createSkill(name, content, scope, projectPath) {
+  try {
+    let targetDir;
+
+    if (scope === 'user') {
+      // Create in ~/.claude/commands/
+      targetDir = path.join(os.homedir(), '.claude', 'commands');
+    } else {
+      // Create in project's .claude/commands/
+      if (!projectPath) {
+        return { success: false, error: 'No project path specified' };
+      }
+      targetDir = path.join(projectPath, '.claude', 'commands');
+    }
+
+    // Ensure directory exists
+    if (!fs.existsSync(targetDir)) {
+      fs.mkdirSync(targetDir, { recursive: true });
+    }
+
+    const filePath = path.join(targetDir, `${name}.md`);
+
+    // Check if file already exists
+    if (fs.existsSync(filePath)) {
+      return { success: false, error: `Skill "${name}" already exists` };
+    }
+
+    fs.writeFileSync(filePath, content, 'utf8');
+    return { success: true, filePath };
+  } catch (err) {
+    console.error('Error creating skill:', err);
+    return { success: false, error: err.message };
+  }
+}
+
+/**
  * Setup IPC handlers
  */
 function setupIPC(ipcMain) {
@@ -211,11 +249,17 @@ function setupIPC(ipcMain) {
     const result = saveSkill(filePath, content);
     event.sender.send(IPC.SKILL_SAVED, result);
   });
+
+  ipcMain.on(IPC.CREATE_SKILL, (event, { name, content, scope, projectPath }) => {
+    const result = createSkill(name, content, scope, projectPath);
+    event.sender.send(IPC.SKILL_CREATED, result);
+  });
 }
 
 module.exports = {
   init,
   setupIPC,
   loadSkills,
-  saveSkill
+  saveSkill,
+  createSkill
 };

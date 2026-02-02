@@ -85,6 +85,16 @@ function sendCommand(command, terminalId = null) {
 }
 
 /**
+ * Send input text to terminal without pressing Enter
+ * Useful for inserting templates that user can review/edit
+ */
+function sendInput(text, terminalId = null) {
+  if (multiTerminalUI) {
+    multiTerminalUI.sendInput(text, terminalId);
+  }
+}
+
+/**
  * Set active terminal
  */
 function setActiveTerminal(terminalId) {
@@ -95,6 +105,9 @@ function setActiveTerminal(terminalId) {
 
 // Expose sendCommand globally for modules that can't import terminal directly (circular dependency)
 window.terminalSendCommand = sendCommand;
+
+// Expose sendInput globally for templates
+window.terminalSendInput = sendInput;
 
 // Expose focus function globally for returning focus from other panels
 window.terminalFocus = function() {
@@ -132,6 +145,7 @@ module.exports = {
   startTerminal,
   restartTerminal,
   sendCommand,
+  sendInput,
   setActiveTerminal,
   getMultiTerminalUI
 };

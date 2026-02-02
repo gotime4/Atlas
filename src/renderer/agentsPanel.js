@@ -14,6 +14,7 @@ let currentContent = null;
 let currentFilePath = null;
 let hasUnsavedChanges = false;
 let currentProjectPath = null;
+let showCreateForm = false;
 
 /**
  * Initialize agents panel
@@ -35,11 +36,34 @@ function setupPanelEvents() {
     closeBtn.addEventListener('click', () => toggle());
   }
 
+  // Collapse button
+  const collapseBtn = document.getElementById('agents-collapse-btn');
+  if (collapseBtn) {
+    collapseBtn.addEventListener('click', () => toggle());
+  }
+
   // Refresh button
   const refreshBtn = document.getElementById('agents-refresh');
   if (refreshBtn) {
     refreshBtn.addEventListener('click', () => loadAgents());
   }
+
+  // Create button
+  const createBtn = document.getElementById('agents-create');
+  if (createBtn) {
+    createBtn.addEventListener('click', () => toggleCreateForm());
+  }
+}
+
+/**
+ * Toggle create form visibility
+ */
+function toggleCreateForm() {
+  showCreateForm = !showCreateForm;
+  if (showCreateForm) {
+    expandedAgentId = null;
+  }
+  renderAgents();
 }
 
 /**
@@ -92,22 +116,153 @@ function loadAgents() {
 function renderAgents() {
   if (!contentElement) return;
 
+  contentElement.innerHTML = '';
+
+  // Show create form if active
+  if (showCreateForm) {
+    const form = createAgentForm();
+    contentElement.appendChild(form);
+    return;
+  }
+
   if (agents.length === 0) {
     contentElement.innerHTML = `
       <div class="agents-empty">
         <p>No agents found</p>
         <p class="agents-empty-hint">Agents are stored in .claude/agents/*.md</p>
+        <button class="btn agent-create-first" id="agent-create-first-btn">+ Create Agent</button>
       </div>
     `;
+    const createFirstBtn = document.getElementById('agent-create-first-btn');
+    if (createFirstBtn) {
+      createFirstBtn.addEventListener('click', () => toggleCreateForm());
+    }
     return;
   }
-
-  contentElement.innerHTML = '';
 
   agents.forEach(agent => {
     const item = createAgentItem(agent);
     contentElement.appendChild(item);
   });
+}
+
+/**
+ * Create the agent creation form
+ */
+function createAgentForm() {
+  const form = document.createElement('div');
+  form.className = 'agent-create-form';
+  form.innerHTML = `
+    <div class="agent-form-header">
+      <h4>Create New Agent</h4>
+      <button class="agent-form-close" id="agent-form-close">✕</button>
+    </div>
+    <div class="agent-form-body">
+      <div class="agent-form-group">
+        <label>Agent Name</label>
+        <input type="text" id="agent-name-input" placeholder="my-agent" pattern="[a-z0-9-]+" />
+        <span class="agent-form-hint">Lowercase letters, numbers, and hyphens only</span>
+      </div>
+      <div class="agent-form-group">
+        <label>Description</label>
+        <input type="text" id="agent-desc-input" placeholder="What does this agent specialize in?" />
+      </div>
+      <div class="agent-form-group">
+        <label>Scope</label>
+        <select id="agent-scope-input">
+          <option value="project">Project (current project only)</option>
+          <option value="user">User (~/.claude/agents/)</option>
+        </select>
+      </div>
+      <div class="agent-form-group">
+        <label>System Prompt / Instructions</label>
+        <textarea id="agent-content-input" placeholder="Define the agent's behavior and capabilities...
+
+Example:
+You are a code review specialist. When reviewing code:
+1. Check for security vulnerabilities
+2. Suggest performance improvements
+3. Ensure code follows best practices
+4. Look for potential bugs
+
+You have access to the following tools:
+- Read: Read files from the codebase
+- Grep: Search for patterns in code
+- Bash: Run commands (with user permission)" rows="14"></textarea>
+      </div>
+      <div class="agent-form-group">
+        <label>Allowed Tools (optional)</label>
+        <textarea id="agent-tools-input" placeholder="List tools this agent can use, one per line:
+
+Read
+Grep
+Bash
+Write" rows="4"></textarea>
+      </div>
+    </div>
+    <div class="agent-form-actions">
+      <button class="btn btn-secondary" id="agent-form-cancel">Cancel</button>
+      <button class="btn btn-success" id="agent-form-save">Create Agent</button>
+    </div>
+  `;
+
+  // Add event listeners after adding to DOM
+  setTimeout(() => {
+    document.getElementById('agent-form-close')?.addEventListener('click', () => {
+      showCreateForm = false;
+      renderAgents();
+    });
+    document.getElementById('agent-form-cancel')?.addEventListener('click', () => {
+      showCreateForm = false;
+      renderAgents();
+    });
+    document.getElementById('agent-form-save')?.addEventListener('click', saveNewAgent);
+    document.getElementById('agent-name-input')?.focus();
+  }, 0);
+
+  return form;
+}
+
+/**
+ * Save new agent
+ */
+function saveNewAgent() {
+  const name = document.getElementById('agent-name-input').value.trim().toLowerCase().replace(/[^a-z0-9-]/g, '-');
+  const description = document.getElementById('agent-desc-input').value.trim();
+  const scope = document.getElementById('agent-scope-input').value;
+  const content = document.getElementById('agent-content-input').value;
+  const tools = document.getElementById('agent-tools-input').value.trim();
+
+  if (!name) {
+    alert('Please enter an agent name');
+    return;
+  }
+
+  if (!content) {
+    alert('Please enter agent instructions');
+    return;
+  }
+
+  // Build the markdown content with YAML frontmatter
+  let markdown = '---\n';
+  markdown += `description: ${description || 'Custom agent'}\n`;
+  if (tools) {
+    markdown += 'tools:\n';
+    tools.split('\n').filter(t => t.trim()).forEach(t => {
+      markdown += `  - ${t.trim()}\n`;
+    });
+  }
+  markdown += '---\n\n';
+  markdown += content;
+
+  ipcRenderer.send(IPC.CREATE_AGENT, {
+    name,
+    content: markdown,
+    scope,
+    projectPath: currentProjectPath
+  });
+
+  showCreateForm = false;
 }
 
 /**
@@ -314,6 +469,15 @@ function setupIPC() {
 
   ipcRenderer.on(IPC.TOGGLE_AGENTS_PANEL, () => {
     toggle();
+  });
+
+  ipcRenderer.on(IPC.AGENT_CREATED, (event, result) => {
+    if (result.success) {
+      loadAgents();
+    } else {
+      console.error('Failed to create agent:', result.error);
+      alert('Failed to create agent: ' + result.error);
+    }
   });
 }
 

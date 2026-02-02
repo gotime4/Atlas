@@ -8,6 +8,10 @@ const pluginsPanel = require('./pluginsPanel');
 const githubPanel = require('./githubPanel');
 const agentsPanel = require('./agentsPanel');
 const skillsPanel = require('./skillsPanel');
+const mcpPanel = require('./mcpPanel');
+const diffPanel = require('./diffPanel');
+const contextPanel = require('./contextPanel');
+const templatesPanel = require('./templatesPanel');
 
 class TerminalTabBar {
   constructor(container, manager) {
@@ -155,6 +159,36 @@ class TerminalTabBar {
             <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
           </svg>
           Skills
+        </button>
+        <button class="btn-mcp-toggle" title="Toggle MCP Panel (Ctrl+Shift+M)">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M12 2L2 7l10 5 10-5-10-5z"/>
+            <path d="M2 17l10 5 10-5"/>
+            <path d="M2 12l10 5 10-5"/>
+          </svg>
+          MCPs
+        </button>
+        <button class="btn-diff-toggle" title="Toggle Diff Panel (Ctrl+Shift+D)">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M12 3v18"/>
+            <path d="M3 12h6l3-9 3 18 3-9h6"/>
+          </svg>
+          Diff
+        </button>
+        <button class="btn-context-toggle" title="Toggle Context Panel (Ctrl+Shift+X)">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="12" r="10"/>
+            <path d="M12 6v6l4 2"/>
+          </svg>
+          Context
+        </button>
+        <button class="btn-templates-toggle" title="Toggle Templates Panel (Ctrl+Shift+T)">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <rect x="3" y="3" width="18" height="18" rx="2"/>
+            <path d="M3 9h18"/>
+            <path d="M9 21V9"/>
+          </svg>
+          Templates
         </button>
       </div>
     `;
@@ -308,6 +342,26 @@ class TerminalTabBar {
     // Skills toggle button
     this.element.querySelector('.btn-skills-toggle').addEventListener('click', () => {
       skillsPanel.toggle();
+    });
+
+    // MCP toggle button
+    this.element.querySelector('.btn-mcp-toggle').addEventListener('click', () => {
+      mcpPanel.toggle();
+    });
+
+    // Diff toggle button
+    this.element.querySelector('.btn-diff-toggle').addEventListener('click', () => {
+      diffPanel.toggle();
+    });
+
+    // Context toggle button
+    this.element.querySelector('.btn-context-toggle').addEventListener('click', () => {
+      contextPanel.toggle();
+    });
+
+    // Templates toggle button
+    this.element.querySelector('.btn-templates-toggle').addEventListener('click', () => {
+      templatesPanel.toggle();
     });
   }
 

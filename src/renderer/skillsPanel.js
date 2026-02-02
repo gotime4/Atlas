@@ -14,6 +14,7 @@ let currentContent = null;
 let currentFilePath = null;
 let hasUnsavedChanges = false;
 let currentProjectPath = null;
+let showCreateForm = false;
 
 /**
  * Initialize skills panel
@@ -35,11 +36,34 @@ function setupPanelEvents() {
     closeBtn.addEventListener('click', () => toggle());
   }
 
+  // Collapse button
+  const collapseBtn = document.getElementById('skills-collapse-btn');
+  if (collapseBtn) {
+    collapseBtn.addEventListener('click', () => toggle());
+  }
+
   // Refresh button
   const refreshBtn = document.getElementById('skills-refresh');
   if (refreshBtn) {
     refreshBtn.addEventListener('click', () => loadSkills());
   }
+
+  // Create button
+  const createBtn = document.getElementById('skills-create');
+  if (createBtn) {
+    createBtn.addEventListener('click', () => toggleCreateForm());
+  }
+}
+
+/**
+ * Toggle create form visibility
+ */
+function toggleCreateForm() {
+  showCreateForm = !showCreateForm;
+  if (showCreateForm) {
+    expandedSkillId = null;
+  }
+  renderSkills();
 }
 
 /**
@@ -92,22 +116,149 @@ function loadSkills() {
 function renderSkills() {
   if (!contentElement) return;
 
+  contentElement.innerHTML = '';
+
+  // Show create form if active
+  if (showCreateForm) {
+    const form = createSkillForm();
+    contentElement.appendChild(form);
+    return;
+  }
+
   if (skills.length === 0) {
     contentElement.innerHTML = `
       <div class="skills-empty">
         <p>No skills found</p>
         <p class="skills-empty-hint">Skills are stored in .claude/commands/*.md</p>
+        <button class="btn skill-create-first" id="skill-create-first-btn">+ Create Skill</button>
       </div>
     `;
+    const createFirstBtn = document.getElementById('skill-create-first-btn');
+    if (createFirstBtn) {
+      createFirstBtn.addEventListener('click', () => toggleCreateForm());
+    }
     return;
   }
-
-  contentElement.innerHTML = '';
 
   skills.forEach(skill => {
     const item = createSkillItem(skill);
     contentElement.appendChild(item);
   });
+}
+
+/**
+ * Create the skill creation form
+ */
+function createSkillForm() {
+  const form = document.createElement('div');
+  form.className = 'skill-create-form';
+  form.innerHTML = `
+    <div class="skill-form-header">
+      <h4>Create New Skill</h4>
+      <button class="skill-form-close" id="skill-form-close">✕</button>
+    </div>
+    <div class="skill-form-body">
+      <div class="skill-form-group">
+        <label>Command Name</label>
+        <div class="skill-form-input-prefix">
+          <span>/</span>
+          <input type="text" id="skill-name-input" placeholder="my-skill" pattern="[a-z0-9-]+" />
+        </div>
+        <span class="skill-form-hint">Lowercase letters, numbers, and hyphens only</span>
+      </div>
+      <div class="skill-form-group">
+        <label>Description</label>
+        <input type="text" id="skill-desc-input" placeholder="What does this skill do?" />
+      </div>
+      <div class="skill-form-group">
+        <label>Scope</label>
+        <select id="skill-scope-input">
+          <option value="project">Project (current project only)</option>
+          <option value="user">User (~/.claude/commands/)</option>
+        </select>
+      </div>
+      <div class="skill-form-group">
+        <label>Instructions / Prompt</label>
+        <textarea id="skill-content-input" placeholder="Enter the skill instructions...
+
+You can include:
+- Step-by-step instructions
+- Code examples
+- References to tools
+- Variable placeholders like $ARGUMENTS" rows="12"></textarea>
+      </div>
+      <div class="skill-form-group">
+        <label>Resources (optional)</label>
+        <textarea id="skill-resources-input" placeholder="List any files or resources this skill needs access to, one per line:
+
+src/components/
+docs/api.md
+package.json" rows="4"></textarea>
+      </div>
+    </div>
+    <div class="skill-form-actions">
+      <button class="btn btn-secondary" id="skill-form-cancel">Cancel</button>
+      <button class="btn btn-success" id="skill-form-save">Create Skill</button>
+    </div>
+  `;
+
+  // Add event listeners after adding to DOM
+  setTimeout(() => {
+    document.getElementById('skill-form-close')?.addEventListener('click', () => {
+      showCreateForm = false;
+      renderSkills();
+    });
+    document.getElementById('skill-form-cancel')?.addEventListener('click', () => {
+      showCreateForm = false;
+      renderSkills();
+    });
+    document.getElementById('skill-form-save')?.addEventListener('click', saveNewSkill);
+    document.getElementById('skill-name-input')?.focus();
+  }, 0);
+
+  return form;
+}
+
+/**
+ * Save new skill
+ */
+function saveNewSkill() {
+  const name = document.getElementById('skill-name-input').value.trim().toLowerCase().replace(/[^a-z0-9-]/g, '-');
+  const description = document.getElementById('skill-desc-input').value.trim();
+  const scope = document.getElementById('skill-scope-input').value;
+  const content = document.getElementById('skill-content-input').value;
+  const resources = document.getElementById('skill-resources-input').value.trim();
+
+  if (!name) {
+    alert('Please enter a command name');
+    return;
+  }
+
+  if (!content) {
+    alert('Please enter skill instructions');
+    return;
+  }
+
+  // Build the markdown content with YAML frontmatter
+  let markdown = '---\n';
+  markdown += `description: ${description || 'Custom skill'}\n`;
+  if (resources) {
+    markdown += 'resources:\n';
+    resources.split('\n').filter(r => r.trim()).forEach(r => {
+      markdown += `  - ${r.trim()}\n`;
+    });
+  }
+  markdown += '---\n\n';
+  markdown += content;
+
+  ipcRenderer.send(IPC.CREATE_SKILL, {
+    name,
+    content: markdown,
+    scope,
+    projectPath: currentProjectPath
+  });
+
+  showCreateForm = false;
 }
 
 /**
@@ -314,6 +465,15 @@ function setupIPC() {
 
   ipcRenderer.on(IPC.TOGGLE_SKILLS_PANEL, () => {
     toggle();
+  });
+
+  ipcRenderer.on(IPC.SKILL_CREATED, (event, result) => {
+    if (result.success) {
+      loadSkills();
+    } else {
+      console.error('Failed to create skill:', result.error);
+      alert('Failed to create skill: ' + result.error);
+    }
   });
 }
 
