@@ -12,6 +12,11 @@ let fileWatchers = new Map();
 let fileSnapshots = new Map(); // Store original file contents
 let pendingChanges = new Map(); // Files with uncommitted changes
 
+// Memory limits
+const MAX_FILE_SIZE = 100 * 1024; // 100KB max file size to snapshot
+const MAX_TRACKED_FILES = 200; // Maximum files to track
+const MAX_DIFF_LINES = 1000; // Max lines for diff calculation
+
 /**
  * Initialize module
  */
@@ -81,8 +86,8 @@ function handleFileChange(filePath) {
     const stat = fs.statSync(filePath);
     if (!stat.isFile()) return;
 
-    // Don't track very large files
-    if (stat.size > 1024 * 1024) return; // 1MB limit
+    // Don't track large files - use same limit as snapshots
+    if (stat.size > MAX_FILE_SIZE) return;
 
     const newContent = fs.readFileSync(filePath, 'utf8');
     const oldContent = fileSnapshots.get(filePath);
@@ -123,32 +128,56 @@ function handleFileChange(filePath) {
 function snapshotFile(filePath) {
   try {
     if (fs.existsSync(filePath)) {
+      const stat = fs.statSync(filePath);
+
+      // Skip files that are too large
+      if (stat.size > MAX_FILE_SIZE) {
+        return { success: false, reason: 'file too large' };
+      }
+
+      // Enforce max tracked files limit
+      if (fileSnapshots.size >= MAX_TRACKED_FILES && !fileSnapshots.has(filePath)) {
+        // Remove oldest entry to make room
+        const oldestKey = fileSnapshots.keys().next().value;
+        fileSnapshots.delete(oldestKey);
+      }
+
       const content = fs.readFileSync(filePath, 'utf8');
       fileSnapshots.set(filePath, content);
       return { success: true };
     }
   } catch (err) {
-    console.error('Error snapshotting file:', err);
+    // File might be binary or unreadable - silently skip
   }
   return { success: false };
 }
 
 /**
  * Take snapshots of all files in a directory
+ * Now much more conservative to prevent memory issues
  */
 function snapshotDirectory(dirPath, depth = 0) {
-  if (depth > 5) return; // Limit recursion depth
+  // Reduced depth limit and early exit if we've hit file limit
+  if (depth > 3 || fileSnapshots.size >= MAX_TRACKED_FILES) return;
 
   try {
     const entries = fs.readdirSync(dirPath, { withFileTypes: true });
 
     for (const entry of entries) {
+      // Stop if we've hit the file limit
+      if (fileSnapshots.size >= MAX_TRACKED_FILES) break;
+
       if (shouldIgnoreFile(entry.name)) continue;
 
       const fullPath = path.join(dirPath, entry.name);
 
       if (entry.isFile()) {
-        snapshotFile(fullPath);
+        // Only snapshot common source file types
+        const ext = path.extname(entry.name).toLowerCase();
+        const sourceExtensions = ['.js', '.ts', '.jsx', '.tsx', '.json', '.md', '.css', '.html', '.vue', '.svelte'];
+        if (sourceExtensions.includes(ext)) {
+          snapshotFile(fullPath);
+        }
       } else if (entry.isDirectory()) {
         snapshotDirectory(fullPath, depth + 1);
       }
@@ -228,37 +257,112 @@ function generateDiff(oldContent, newContent) {
 
 /**
  * Compute Longest Common Subsequence for diff
+ * Memory-optimized version with limits for large files
  */
 function computeLCS(oldLines, newLines) {
   const m = oldLines.length;
   const n = newLines.length;
 
-  // Build LCS table
-  const dp = Array(m + 1).fill(null).map(() => Array(n + 1).fill(0));
+  // For very large files, use a simpler line-by-line comparison
+  // to avoid O(m*n) memory allocation
+  if (m > MAX_DIFF_LINES || n > MAX_DIFF_LINES) {
+    return computeSimpleLCS(oldLines, newLines);
+  }
+
+  // Build LCS table - use only 2 rows to reduce memory from O(m*n) to O(n)
+  let prevRow = Array(n + 1).fill(0);
+  let currRow = Array(n + 1).fill(0);
+
+  // We need to track the actual matches, so build a simplified path
+  const matchMap = new Map();
 
   for (let i = 1; i <= m; i++) {
     for (let j = 1; j <= n; j++) {
       if (oldLines[i - 1] === newLines[j - 1]) {
-        dp[i][j] = dp[i - 1][j - 1] + 1;
+        currRow[j] = prevRow[j - 1] + 1;
+        matchMap.set(`${i - 1},${j - 1}`, true);
       } else {
-        dp[i][j] = Math.max(dp[i - 1][j], dp[i][j - 1]);
+        currRow[j] = Math.max(prevRow[j], currRow[j - 1]);
+      }
+    }
+    // Swap rows
+    [prevRow, currRow] = [currRow, prevRow];
+    currRow.fill(0);
+  }
+
+  // Extract matches by finding matching lines
+  const matches = [];
+  let oldIdx = 0, newIdx = 0;
+
+  while (oldIdx < m && newIdx < n) {
+    if (oldLines[oldIdx] === newLines[newIdx]) {
+      matches.push({ oldIdx, newIdx });
+      oldIdx++;
+      newIdx++;
+    } else if (matchMap.has(`${oldIdx},${newIdx}`)) {
+      matches.push({ oldIdx, newIdx });
+      oldIdx++;
+      newIdx++;
+    } else {
+      // Try to find next match
+      let foundOld = -1, foundNew = -1;
+      for (let k = newIdx; k < Math.min(newIdx + 10, n); k++) {
+        if (oldLines[oldIdx] === newLines[k]) {
+          foundNew = k;
+          break;
+        }
+      }
+      for (let k = oldIdx; k < Math.min(oldIdx + 10, m); k++) {
+        if (oldLines[k] === newLines[newIdx]) {
+          foundOld = k;
+          break;
+        }
+      }
+
+      if (foundNew >= 0 && (foundOld < 0 || foundNew - newIdx <= foundOld - oldIdx)) {
+        newIdx = foundNew;
+      } else if (foundOld >= 0) {
+        oldIdx = foundOld;
+      } else {
+        oldIdx++;
+        newIdx++;
       }
     }
   }
 
-  // Backtrack to find matches
-  const matches = [];
-  let i = m, j = n;
+  return matches;
+}
 
-  while (i > 0 && j > 0) {
-    if (oldLines[i - 1] === newLines[j - 1]) {
-      matches.unshift({ oldIdx: i - 1, newIdx: j - 1 });
-      i--;
-      j--;
-    } else if (dp[i - 1][j] > dp[i][j - 1]) {
-      i--;
-    } else {
-      j--;
+/**
+ * Simple LCS for very large files - just find exact line matches
+ */
+function computeSimpleLCS(oldLines, newLines) {
+  const matches = [];
+  const newLineSet = new Map();
+
+  // Index new lines by content
+  newLines.forEach((line, idx) => {
+    if (!newLineSet.has(line)) {
+      newLineSet.set(line, []);
+    }
+    newLineSet.get(line).push(idx);
+  });
+
+  let lastNewIdx = -1;
+
+  for (let oldIdx = 0; oldIdx < oldLines.length; oldIdx++) {
+    const line = oldLines[oldIdx];
+    const newIndices = newLineSet.get(line);
+
+    if (newIndices) {
+      // Find the first new index that's after our last match
+      for (const newIdx of newIndices) {
+        if (newIdx > lastNewIdx) {
+          matches.push({ oldIdx, newIdx });
+          lastNewIdx = newIdx;
+          break;
+        }
+      }
     }
   }
 
@@ -375,6 +479,26 @@ function stopWatching() {
 }
 
 /**
+ * Clear all snapshots and pending changes (free memory)
+ */
+function clearSnapshots() {
+  fileSnapshots.clear();
+  pendingChanges.clear();
+}
+
+/**
+ * Get memory usage stats for debugging
+ */
+function getMemoryStats() {
+  return {
+    trackedFiles: fileSnapshots.size,
+    pendingChanges: pendingChanges.size,
+    maxTrackedFiles: MAX_TRACKED_FILES,
+    maxFileSize: MAX_FILE_SIZE
+  };
+}
+
+/**
  * Setup IPC handlers
  */
 function setupIPC(ipcMain) {
@@ -403,6 +527,8 @@ function setupIPC(ipcMain) {
   });
 
   ipcMain.on(IPC.WATCH_PROJECT, (event, projectPath) => {
+    // Clear old snapshots when switching projects to free memory
+    clearSnapshots();
     watchProject(projectPath);
     snapshotDirectory(projectPath);
   });
@@ -422,5 +548,7 @@ module.exports = {
   getFileDiff,
   acceptChanges,
   revertChanges,
-  stopWatching
+  stopWatching,
+  clearSnapshots,
+  getMemoryStats
 };

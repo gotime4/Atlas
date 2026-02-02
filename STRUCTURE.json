@@ -3785,7 +3785,9 @@
         "getFileDiff",
         "acceptChanges",
         "revertChanges",
-        "stopWatching"
+        "stopWatching",
+        "clearSnapshots",
+        "getMemoryStats"
       ],
       "depends": [
         "fs",
@@ -3794,50 +3796,50 @@
       ],
       "functions": {
         "init": {
-          "line": 18,
+          "line": 23,
           "params": [
             "window"
           ],
           "purpose": "Initialize module"
         },
         "watchProject": {
-          "line": 25,
+          "line": 30,
           "params": [
             "projectPath"
           ],
           "purpose": "Start watching a project directory for file changes"
         },
         "shouldIgnoreFile": {
-          "line": 55,
+          "line": 60,
           "params": [
             "filename"
           ],
           "purpose": "Check if file should be ignored"
         },
         "handleFileChange": {
-          "line": 79,
+          "line": 84,
           "params": [
             "filePath"
           ],
           "purpose": "Handle file change event"
         },
         "snapshotFile": {
-          "line": 123,
+          "line": 128,
           "params": [
             "filePath"
           ],
           "purpose": "Take a snapshot of a file (for tracking changes)"
         },
         "snapshotDirectory": {
-          "line": 139,
+          "line": 159,
           "params": [
             "dirPath",
             "depth = 0"
           ],
-          "purpose": "Take snapshots of all files in a directory"
+          "purpose": "Now much more conservative to prevent memory issues"
         },
         "generateDiff": {
-          "line": 164,
+          "line": 193,
           "params": [
             "oldContent",
             "newContent"
@@ -3845,40 +3847,48 @@
           "purpose": "Generate a simple line-by-line diff"
         },
         "computeLCS": {
-          "line": 232,
+          "line": 262,
           "params": [
             "oldLines",
             "newLines"
           ],
-          "purpose": "Compute Longest Common Subsequence for diff"
+          "purpose": "Memory-optimized version with limits for large files"
+        },
+        "computeSimpleLCS": {
+          "line": 339,
+          "params": [
+            "oldLines",
+            "newLines"
+          ],
+          "purpose": "Simple LCS for very large files - just find exact line matches"
         },
         "getPendingChanges": {
-          "line": 271,
+          "line": 375,
           "purpose": "Get all pending changes"
         },
         "getFileDiff": {
-          "line": 278,
+          "line": 382,
           "params": [
             "filePath"
           ],
           "purpose": "Get diff for a specific file"
         },
         "acceptChanges": {
-          "line": 285,
+          "line": 389,
           "params": [
             "filePath"
           ],
           "purpose": "Accept changes (update snapshot to current)"
         },
         "revertChanges": {
-          "line": 298,
+          "line": 402,
           "params": [
             "filePath"
           ],
           "purpose": "Revert changes (restore original content)"
         },
         "revertHunk": {
-          "line": 316,
+          "line": 420,
           "params": [
             "filePath",
             "hunkIndex"
@@ -3886,15 +3896,23 @@
           "purpose": "Revert a specific hunk"
         },
         "clearAllChanges": {
-          "line": 359,
+          "line": 463,
           "purpose": "Clear all pending changes (accept all)"
         },
         "stopWatching": {
-          "line": 370,
+          "line": 474,
           "purpose": "Stop watching files"
         },
+        "clearSnapshots": {
+          "line": 484,
+          "purpose": "Clear all snapshots and pending changes (free memory)"
+        },
+        "getMemoryStats": {
+          "line": 492,
+          "purpose": "Get memory usage stats for debugging"
+        },
         "setupIPC": {
-          "line": 380,
+          "line": 504,
           "params": [
             "ipcMain"
           ],
