@@ -3815,21 +3815,21 @@
           "purpose": "Check if file should be ignored"
         },
         "handleFileChange": {
-          "line": 77,
+          "line": 79,
           "params": [
             "filePath"
           ],
           "purpose": "Handle file change event"
         },
         "snapshotFile": {
-          "line": 121,
+          "line": 123,
           "params": [
             "filePath"
           ],
           "purpose": "Take a snapshot of a file (for tracking changes)"
         },
         "snapshotDirectory": {
-          "line": 137,
+          "line": 139,
           "params": [
             "dirPath",
             "depth = 0"
@@ -3837,7 +3837,7 @@
           "purpose": "Take snapshots of all files in a directory"
         },
         "generateDiff": {
-          "line": 162,
+          "line": 164,
           "params": [
             "oldContent",
             "newContent"
@@ -3845,7 +3845,7 @@
           "purpose": "Generate a simple line-by-line diff"
         },
         "computeLCS": {
-          "line": 230,
+          "line": 232,
           "params": [
             "oldLines",
             "newLines"
@@ -3853,32 +3853,32 @@
           "purpose": "Compute Longest Common Subsequence for diff"
         },
         "getPendingChanges": {
-          "line": 269,
+          "line": 271,
           "purpose": "Get all pending changes"
         },
         "getFileDiff": {
-          "line": 276,
+          "line": 278,
           "params": [
             "filePath"
           ],
           "purpose": "Get diff for a specific file"
         },
         "acceptChanges": {
-          "line": 283,
+          "line": 285,
           "params": [
             "filePath"
           ],
           "purpose": "Accept changes (update snapshot to current)"
         },
         "revertChanges": {
-          "line": 296,
+          "line": 298,
           "params": [
             "filePath"
           ],
           "purpose": "Revert changes (restore original content)"
         },
         "revertHunk": {
-          "line": 314,
+          "line": 316,
           "params": [
             "filePath",
             "hunkIndex"
@@ -3886,15 +3886,15 @@
           "purpose": "Revert a specific hunk"
         },
         "clearAllChanges": {
-          "line": 357,
+          "line": 359,
           "purpose": "Clear all pending changes (accept all)"
         },
         "stopWatching": {
-          "line": 368,
+          "line": 370,
           "purpose": "Stop watching files"
         },
         "setupIPC": {
-          "line": 378,
+          "line": 380,
           "params": [
             "ipcMain"
           ],

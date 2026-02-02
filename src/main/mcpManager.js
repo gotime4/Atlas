@@ -390,7 +390,7 @@ function getMcpTemplates() {
       config: {
         type: 'stdio',
         command: 'npx',
-        args: ['@anthropics/mcp-playwright']
+        args: ['@playwright/mcp@latest']
       }
     },
     {

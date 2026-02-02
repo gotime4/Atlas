@@ -65,6 +65,8 @@ function shouldIgnoreFile(filename) {
     /\.log$/,
     /dist\//,
     /build\//,
+    /release\//,
+    /\.asar$/,
     /\.atlas\//
   ];
 
