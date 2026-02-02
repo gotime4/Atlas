@@ -1,12 +1,12 @@
 /**
  * Tasks Manager Module
- * Handles task CRUD operations for Frame projects
+ * Handles task CRUD operations for Atlas projects
  */
 
 const fs = require('fs');
 const path = require('path');
 const { IPC } = require('../shared/ipcChannels');
-const { FRAME_FILES } = require('../shared/frameConstants');
+const { ATLAS_FILES } = require('../shared/atlasConstants');
 
 let mainWindow = null;
 let currentProjectPath = null;
@@ -29,7 +29,7 @@ function setProjectPath(projectPath) {
  * Get tasks file path for a project
  */
 function getTasksFilePath(projectPath) {
-  return path.join(projectPath || currentProjectPath, FRAME_FILES.TASKS);
+  return path.join(projectPath || currentProjectPath, ATLAS_FILES.TASKS);
 }
 
 /**

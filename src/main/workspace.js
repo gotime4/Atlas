@@ -1,13 +1,13 @@
 /**
  * Workspace Module
- * Manages workspace configuration in ~/.frame/workspaces.json
+ * Manages workspace configuration in ~/.atlas/workspaces.json
  */
 
 const fs = require('fs');
 const path = require('path');
 const os = require('os');
 const { IPC } = require('../shared/ipcChannels');
-const { WORKSPACE_DIR, WORKSPACE_FILE, FRAME_VERSION } = require('../shared/frameConstants');
+const { WORKSPACE_DIR, WORKSPACE_FILE, ATLAS_VERSION } = require('../shared/atlasConstants');
 
 let workspaceDir = null;
 let workspacePath = null;
@@ -41,7 +41,7 @@ function ensureWorkspaceDir() {
  */
 function createDefaultWorkspace() {
   return {
-    version: FRAME_VERSION,
+    version: ATLAS_VERSION,
     activeWorkspace: 'default',
     workspaces: {
       default: {
@@ -89,7 +89,7 @@ function getProjects() {
 /**
  * Add project to workspace
  */
-function addProject(projectPath, name, isFrameProject = false) {
+function addProject(projectPath, name, isAtlasProject = false) {
   const workspace = loadWorkspace();
   const active = workspace.activeWorkspace;
 
@@ -102,7 +102,7 @@ function addProject(projectPath, name, isFrameProject = false) {
   workspace.workspaces[active].projects.push({
     path: projectPath,
     name: name || path.basename(projectPath),
-    isFrameProject: isFrameProject,
+    isAtlasProject: isAtlasProject,
     addedAt: new Date().toISOString(),
     lastOpenedAt: null
   });
@@ -141,9 +141,9 @@ function updateProjectLastOpened(projectPath) {
 }
 
 /**
- * Update project's Frame status
+ * Update project's Atlas status
  */
-function updateProjectFrameStatus(projectPath, isFrame) {
+function updateProjectAtlasStatus(projectPath, isAtlas) {
   const workspace = loadWorkspace();
   const active = workspace.activeWorkspace;
 
@@ -151,7 +151,7 @@ function updateProjectFrameStatus(projectPath, isFrame) {
     p => p.path === projectPath
   );
   if (project) {
-    project.isFrameProject = isFrame;
+    project.isAtlasProject = isAtlas;
     saveWorkspace(workspace);
   }
 }
@@ -165,8 +165,8 @@ function setupIPC(ipcMain) {
     event.sender.send(IPC.WORKSPACE_DATA, projects);
   });
 
-  ipcMain.on(IPC.ADD_PROJECT_TO_WORKSPACE, (event, { projectPath, name, isFrameProject }) => {
-    const added = addProject(projectPath, name, isFrameProject);
+  ipcMain.on(IPC.ADD_PROJECT_TO_WORKSPACE, (event, { projectPath, name, isAtlasProject }) => {
+    const added = addProject(projectPath, name, isAtlasProject);
     // Only send update if project was actually added (not already in list)
     if (added) {
       const projects = getProjects();
@@ -188,6 +188,6 @@ module.exports = {
   addProject,
   removeProject,
   updateProjectLastOpened,
-  updateProjectFrameStatus,
+  updateProjectAtlasStatus,
   setupIPC
 };

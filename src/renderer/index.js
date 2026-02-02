@@ -34,7 +34,7 @@ function init() {
     pathElement: document.getElementById('project-path'),
     startClaudeBtn: document.getElementById('btn-start-claude'),
     fileExplorerHeader: document.getElementById('file-explorer-header'),
-    initializeFrameBtn: document.getElementById('btn-initialize-frame')
+    initializeAtlasBtn: document.getElementById('btn-initialize-atlas')
   });
 
   // Connect state with multiTerminalUI for project-terminal session management
@@ -122,7 +122,7 @@ function init() {
 
       // Add to workspace and update project list
       const projectName = projectPath.split('/').pop() || projectPath.split('\\').pop();
-      projectListUI.addProject(projectPath, projectName, state.getIsFrameProject());
+      projectListUI.addProject(projectPath, projectName, state.getIsAtlasProject());
       projectListUI.setActiveProject(projectPath);
 
       // Load tasks if tasks panel is visible
@@ -147,14 +147,14 @@ function init() {
     }
   });
 
-  // Setup Frame status change listener
-  state.onFrameStatusChange((isFrame) => {
+  // Setup Atlas status change listener
+  state.onAtlasStatusChange((isAtlas) => {
     // Don't reload entire project list - just update the active project's badge if needed
     // The badge will be updated when the project list is next rendered
   });
 
   // Setup Atlas initialized listener
-  state.onFrameInitialized((projectPath) => {
+  state.onAtlasInitialized((projectPath) => {
     terminal.writelnToTerminal(`\x1b[1;32m✓ Atlas project initialized!\x1b[0m`);
     terminal.writelnToTerminal(`  Created: .atlas/, CLAUDE.md, STRUCTURE.json, PROJECT_NOTES.md, tasks.json, QUICKSTART.md`);
     // Refresh file tree to show new files
@@ -244,9 +244,9 @@ function setupButtonHandlers() {
     state.selectProjectFolder();
   });
 
-  // Initialize as Frame project
-  document.getElementById('btn-initialize-frame').addEventListener('click', () => {
-    state.initializeAsFrameProject();
+  // Initialize as Atlas project
+  document.getElementById('btn-initialize-atlas').addEventListener('click', () => {
+    state.initializeAsAtlasProject();
   });
 }
 

@@ -65,8 +65,7 @@ function shouldIgnoreFile(filename) {
     /\.log$/,
     /dist\//,
     /build\//,
-    /\.atlas\//,
-    /\.frame\//
+    /\.atlas\//
   ];
 
   return ignorePatterns.some(pattern => pattern.test(filename));

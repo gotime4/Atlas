@@ -1,6 +1,6 @@
 /**
- * Frame Templates
- * Templates for auto-generated Frame project files
+ * Atlas Templates
+ * Templates for auto-generated Atlas project files
  * Each template includes instructions header for Claude Code
  */
 
@@ -23,9 +23,9 @@ function getISOTimestamp() {
  */
 function getClaudeTemplate(projectName) {
   const date = getDateString();
-  return `# ${projectName} - Frame Project
+  return `# ${projectName} - Atlas Project
 
-This project is managed with **Frame**. Keep the documentation up to date by following the rules below.
+This project is managed with **Atlas**. Keep the documentation up to date by following the rules below.
 
 ---
 
@@ -101,7 +101,7 @@ Conversation/decision as is, with its context...
 
 ## 📝 Context Preservation (Automatic Note Taking)
 
-Frame's core purpose is to prevent context loss. Therefore, capture important moments and ask the user.
+Atlas's core purpose is to prevent context loss. Therefore, capture important moments and ask the user.
 
 ### When to Ask?
 
@@ -182,7 +182,7 @@ No problem, continue. The user can also say what they consider important themsel
 
 ---
 
-*This file was automatically created by Frame.*
+*This file was automatically created by Atlas.*
 *Creation date: ${date}*
 `;
 }
@@ -192,7 +192,7 @@ No problem, continue. The user can also say what they consider important themsel
  */
 function getStructureTemplate(projectName) {
   return {
-    _frame_metadata: {
+    _atlas_metadata: {
       purpose: "Project structure and module map for AI assistants",
       forClaude: "Read this file FIRST when starting work on this project. It contains the module structure, data flow, and conventions. Update this file when you add new modules or change the architecture.",
       lastUpdated: getDateString(),
@@ -236,7 +236,7 @@ function getNotesTemplate(projectName) {
  */
 function getTasksTemplate(projectName) {
   return {
-    _frame_metadata: {
+    _atlas_metadata: {
       purpose: "Task tracking for the project",
       forClaude: "Check this file to understand what tasks are pending, in progress, or completed. Update task status as you work. Add new tasks when discovered during development. Follow the task recognition rules in CLAUDE.md. IMPORTANT: Include userRequest (original user prompt), detailed description, and acceptanceCriteria for each task.",
       lastUpdated: getDateString(),
@@ -348,9 +348,9 @@ ${projectName}/
 }
 
 /**
- * .frame/config.json template
+ * .atlas/config.json template
  */
-function getFrameConfigTemplate(projectName) {
+function getAtlasConfigTemplate(projectName) {
   return {
     version: "1.0",
     name: projectName,
@@ -378,5 +378,5 @@ module.exports = {
   getNotesTemplate,
   getTasksTemplate,
   getQuickstartTemplate,
-  getFrameConfigTemplate
+  getAtlasConfigTemplate
 };

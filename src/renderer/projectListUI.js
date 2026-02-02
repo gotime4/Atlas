@@ -40,7 +40,7 @@ function renderProjects(projectsList) {
   if (!projectsListElement) return;
 
   // Create a hash to detect if the list actually changed
-  const newHash = JSON.stringify(projectsList?.map(p => p.path + p.name + p.isFrameProject) || []);
+  const newHash = JSON.stringify(projectsList?.map(p => p.path + p.name + p.isAtlasProject) || []);
   if (newHash === lastProjectsHash) {
     // List hasn't changed, skip re-render
     return;
@@ -118,7 +118,7 @@ function createProjectItem(project, index) {
   // Project icon
   const icon = document.createElement('span');
   icon.className = 'project-icon';
-  icon.textContent = project.isFrameProject ? '📦' : '📁';
+  icon.textContent = project.isAtlasProject ? '📦' : '📁';
   item.appendChild(icon);
 
   // Project info container
@@ -140,8 +140,8 @@ function createProjectItem(project, index) {
 
   item.appendChild(infoContainer);
 
-  // Atlas badge (formerly Frame)
-  if (project.isFrameProject) {
+  // Atlas badge
+  if (project.isAtlasProject) {
     const badge = document.createElement('span');
     badge.className = 'atlas-badge';
     badge.textContent = 'Atlas';
@@ -284,11 +284,11 @@ function getActiveProject() {
 /**
  * Add project to workspace
  */
-function addProject(projectPath, projectName, isFrameProject = false) {
+function addProject(projectPath, projectName, isAtlasProject = false) {
   ipcRenderer.send(IPC.ADD_PROJECT_TO_WORKSPACE, {
     projectPath,
     name: projectName,
-    isFrameProject
+    isAtlasProject
   });
 }
 

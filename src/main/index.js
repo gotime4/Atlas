@@ -15,7 +15,7 @@ const dialogs = require('./dialogs');
 const fileTree = require('./fileTree');
 const promptLogger = require('./promptLogger');
 const workspace = require('./workspace');
-const frameProject = require('./frameProject');
+const atlasProject = require('./atlasProject');
 const fileEditor = require('./fileEditor');
 const tasksManager = require('./tasksManager');
 const pluginsManager = require('./pluginsManager');
@@ -86,7 +86,7 @@ function setupAllIPC() {
   fileTree.setupIPC(ipcMain);
   promptLogger.setupIPC(ipcMain);
   workspace.setupIPC(ipcMain);
-  frameProject.setupIPC(ipcMain);
+  atlasProject.setupIPC(ipcMain);
   fileEditor.setupIPC(ipcMain);
   tasksManager.setupIPC(ipcMain);
   pluginsManager.setupIPC(ipcMain);
@@ -124,7 +124,7 @@ function init() {
  */
 function initModulesWithWindow(window) {
   workspace.init(app, window);
-  frameProject.init(window);
+  atlasProject.init(window);
   fileEditor.init(window);
   tasksManager.init(window);
   pluginsManager.init(window);

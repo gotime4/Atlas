@@ -1,23 +1,23 @@
 /**
  * Application State Module
- * Manages project path, Frame status, and UI state
+ * Manages project path, Atlas status, and UI state
  */
 
 const { ipcRenderer } = require('electron');
 const { IPC } = require('../shared/ipcChannels');
 
 let currentProjectPath = null;
-let isCurrentProjectFrame = false;
+let isCurrentProjectAtlas = false;
 let onProjectChangeCallbacks = [];
-let onFrameStatusChangeCallbacks = [];
-let onFrameInitializedCallbacks = [];
+let onAtlasStatusChangeCallbacks = [];
+let onAtlasInitializedCallbacks = [];
 let multiTerminalUI = null; // Reference to MultiTerminalUI instance
 
 // UI Elements
 let pathElement = null;
 let startClaudeBtn = null;
 let fileExplorerHeader = null;
-let initializeFrameBtn = null;
+let initializeAtlasBtn = null;
 
 /**
  * Initialize state module
@@ -26,9 +26,16 @@ function init(elements) {
   pathElement = elements.pathElement || document.getElementById('project-path');
   startClaudeBtn = elements.startClaudeBtn || document.getElementById('btn-start-claude');
   fileExplorerHeader = elements.fileExplorerHeader || document.getElementById('file-explorer-header');
-  initializeFrameBtn = elements.initializeFrameBtn || document.getElementById('btn-initialize-frame');
+  initializeAtlasBtn = elements.initializeAtlasBtn || document.getElementById('btn-initialize-atlas');
 
   setupIPC();
+
+  // Periodic check for Atlas project status (every 5 seconds)
+  setInterval(() => {
+    if (currentProjectPath) {
+      ipcRenderer.send(IPC.CHECK_IS_ATLAS_PROJECT, currentProjectPath);
+    }
+  }, 5000);
 }
 
 /**
@@ -64,11 +71,11 @@ function setProjectPath(path) {
     multiTerminalUI.setCurrentProject(path);
   }
 
-  // Check if it's a Frame project
+  // Check if it's an Atlas project
   if (path) {
-    ipcRenderer.send(IPC.CHECK_IS_FRAME_PROJECT, path);
+    ipcRenderer.send(IPC.CHECK_IS_ATLAS_PROJECT, path);
   } else {
-    setIsFrameProject(false);
+    setIsAtlasProject(false);
   }
 
   // Notify listeners
@@ -83,58 +90,58 @@ function onProjectChange(callback) {
 }
 
 /**
- * Get Frame project status
+ * Get Atlas project status
  */
-function getIsFrameProject() {
-  return isCurrentProjectFrame;
+function getIsAtlasProject() {
+  return isCurrentProjectAtlas;
 }
 
 /**
- * Set Frame project status
+ * Set Atlas project status
  */
-function setIsFrameProject(isFrame) {
-  isCurrentProjectFrame = isFrame;
-  updateFrameUI();
+function setIsAtlasProject(isAtlas) {
+  isCurrentProjectAtlas = isAtlas;
+  updateAtlasUI();
 
   // Notify listeners
-  onFrameStatusChangeCallbacks.forEach(cb => cb(isFrame));
+  onAtlasStatusChangeCallbacks.forEach(cb => cb(isAtlas));
 }
 
 /**
- * Register callback for Frame status change
+ * Register callback for Atlas status change
  */
-function onFrameStatusChange(callback) {
-  onFrameStatusChangeCallbacks.push(callback);
+function onAtlasStatusChange(callback) {
+  onAtlasStatusChangeCallbacks.push(callback);
 }
 
 /**
- * Register callback for Frame project initialized
+ * Register callback for Atlas project initialized
  */
-function onFrameInitialized(callback) {
-  onFrameInitializedCallbacks.push(callback);
+function onAtlasInitialized(callback) {
+  onAtlasInitializedCallbacks.push(callback);
 }
 
 /**
- * Update Frame-related UI
+ * Update Atlas-related UI
  */
-function updateFrameUI() {
-  if (initializeFrameBtn) {
-    // Show "Initialize as Frame" button only for non-Frame projects
-    if (currentProjectPath && !isCurrentProjectFrame) {
-      initializeFrameBtn.style.display = 'block';
+function updateAtlasUI() {
+  if (initializeAtlasBtn) {
+    // Show "Initialize as Atlas" button only for non-Atlas projects
+    if (currentProjectPath && !isCurrentProjectAtlas) {
+      initializeAtlasBtn.style.display = 'block';
     } else {
-      initializeFrameBtn.style.display = 'none';
+      initializeAtlasBtn.style.display = 'none';
     }
   }
 }
 
 /**
- * Initialize current project as Frame project
+ * Initialize current project as Atlas project
  */
-function initializeAsFrameProject() {
+function initializeAsAtlasProject() {
   if (currentProjectPath) {
     const projectName = currentProjectPath.split('/').pop() || currentProjectPath.split('\\').pop();
-    ipcRenderer.send(IPC.INITIALIZE_FRAME_PROJECT, {
+    ipcRenderer.send(IPC.INITIALIZE_ATLAS_PROJECT, {
       projectPath: currentProjectPath,
       projectName: projectName
     });
@@ -198,17 +205,17 @@ function setupIPC() {
     // Terminal session switching is now handled by setProjectPath via multiTerminalUI
   });
 
-  ipcRenderer.on(IPC.IS_FRAME_PROJECT_RESULT, (event, { projectPath, isFrame }) => {
+  ipcRenderer.on(IPC.IS_ATLAS_PROJECT_RESULT, (event, { projectPath, isAtlas }) => {
     if (projectPath === currentProjectPath) {
-      setIsFrameProject(isFrame);
+      setIsAtlasProject(isAtlas);
     }
   });
 
-  ipcRenderer.on(IPC.FRAME_PROJECT_INITIALIZED, (event, { projectPath, success }) => {
+  ipcRenderer.on(IPC.ATLAS_PROJECT_INITIALIZED, (event, { projectPath, success }) => {
     if (success && projectPath === currentProjectPath) {
-      setIsFrameProject(true);
+      setIsAtlasProject(true);
       // Notify listeners
-      onFrameInitializedCallbacks.forEach(cb => cb(projectPath));
+      onAtlasInitializedCallbacks.forEach(cb => cb(projectPath));
     }
   });
 }
@@ -222,9 +229,9 @@ module.exports = {
   updateProjectUI,
   selectProjectFolder,
   createNewProject,
-  getIsFrameProject,
-  setIsFrameProject,
-  onFrameStatusChange,
-  onFrameInitialized,
-  initializeAsFrameProject
+  getIsAtlasProject,
+  setIsAtlasProject,
+  onAtlasStatusChange,
+  onAtlasInitialized,
+  initializeAsAtlasProject
 };

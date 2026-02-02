@@ -35,13 +35,13 @@ const IPC = {
   ADD_PROJECT_TO_WORKSPACE: 'add-project-to-workspace',
   REMOVE_PROJECT_FROM_WORKSPACE: 'remove-project-from-workspace',
 
-  // Frame Project
-  INITIALIZE_FRAME_PROJECT: 'initialize-frame-project',
-  FRAME_PROJECT_INITIALIZED: 'frame-project-initialized',
-  CHECK_IS_FRAME_PROJECT: 'check-is-frame-project',
-  IS_FRAME_PROJECT_RESULT: 'is-frame-project-result',
-  GET_FRAME_CONFIG: 'get-frame-config',
-  FRAME_CONFIG_DATA: 'frame-config-data',
+  // Atlas Project
+  INITIALIZE_ATLAS_PROJECT: 'initialize-atlas-project',
+  ATLAS_PROJECT_INITIALIZED: 'atlas-project-initialized',
+  CHECK_IS_ATLAS_PROJECT: 'check-is-atlas-project',
+  IS_ATLAS_PROJECT_RESULT: 'is-atlas-project-result',
+  GET_ATLAS_CONFIG: 'get-atlas-config',
+  ATLAS_CONFIG_DATA: 'atlas-config-data',
 
   // File Editor
   READ_FILE: 'read-file',

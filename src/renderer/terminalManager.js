@@ -32,7 +32,7 @@ const terminalTheme = {
 };
 
 // Session storage key
-const SESSION_STORAGE_KEY = 'frame-terminal-sessions';
+const SESSION_STORAGE_KEY = 'atlas-terminal-sessions';
 const GLOBAL_PROJECT_KEY = '__global__';
 
 class TerminalManager {

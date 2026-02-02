@@ -1,13 +1,13 @@
 /**
- * Frame Constants
- * Configuration constants for Frame project management
+ * Atlas Constants
+ * Configuration constants for Atlas project management
  */
 
 // Atlas project folder name (inside each project)
-const FRAME_DIR = '.atlas';
+const ATLAS_DIR = '.atlas';
 
-// Frame config file name
-const FRAME_CONFIG_FILE = 'config.json';
+// Atlas config file name
+const ATLAS_CONFIG_FILE = 'config.json';
 
 // Workspace directory name (in user home: ~/.atlas/)
 const WORKSPACE_DIR = '.atlas';
@@ -15,8 +15,8 @@ const WORKSPACE_DIR = '.atlas';
 // Workspace file name
 const WORKSPACE_FILE = 'workspaces.json';
 
-// Frame auto-generated files
-const FRAME_FILES = {
+// Atlas auto-generated files
+const ATLAS_FILES = {
   CLAUDE: 'CLAUDE.md',
   STRUCTURE: 'STRUCTURE.json',
   NOTES: 'PROJECT_NOTES.md',
@@ -24,14 +24,14 @@ const FRAME_FILES = {
   QUICKSTART: 'QUICKSTART.md'
 };
 
-// Frame version
-const FRAME_VERSION = '1.0';
+// Atlas version
+const ATLAS_VERSION = '1.0';
 
 module.exports = {
-  FRAME_DIR,
-  FRAME_CONFIG_FILE,
+  ATLAS_DIR,
+  ATLAS_CONFIG_FILE,
   WORKSPACE_DIR,
   WORKSPACE_FILE,
-  FRAME_FILES,
-  FRAME_VERSION
+  ATLAS_FILES,
+  ATLAS_VERSION
 };

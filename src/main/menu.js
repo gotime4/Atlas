@@ -90,7 +90,7 @@ function getMenuTemplate() {
   // macOS'ta ilk menü app menu olmalı
   if (process.platform === 'darwin') {
     template.unshift({
-      label: 'Frame',
+      label: 'Atlas',
       submenu: [
         { role: 'about' },
         { type: 'separator' },

@@ -7,8 +7,8 @@ const fs = require('fs');
 const path = require('path');
 const { dialog } = require('electron');
 const { IPC } = require('../shared/ipcChannels');
-const { FRAME_DIR, FRAME_CONFIG_FILE, FRAME_FILES } = require('../shared/frameConstants');
-const templates = require('../shared/frameTemplates');
+const { ATLAS_DIR, ATLAS_CONFIG_FILE, ATLAS_FILES } = require('../shared/atlasConstants');
+const templates = require('../shared/atlasTemplates');
 const workspace = require('./workspace');
 
 let mainWindow = null;
@@ -23,16 +23,16 @@ function init(window) {
 /**
  * Check if a project is an Atlas project
  */
-function isFrameProject(projectPath) {
-  const configPath = path.join(projectPath, FRAME_DIR, FRAME_CONFIG_FILE);
+function isAtlasProject(projectPath) {
+  const configPath = path.join(projectPath, ATLAS_DIR, ATLAS_CONFIG_FILE);
   return fs.existsSync(configPath);
 }
 
 /**
- * Get Frame config from project
+ * Get Atlas config from project
  */
-function getFrameConfig(projectPath) {
-  const configPath = path.join(projectPath, FRAME_DIR, FRAME_CONFIG_FILE);
+function getAtlasConfig(projectPath) {
+  const configPath = path.join(projectPath, ATLAS_DIR, ATLAS_CONFIG_FILE);
   try {
     const data = fs.readFileSync(configPath, 'utf8');
     return JSON.parse(data);
@@ -58,15 +58,15 @@ function createFileIfNotExists(filePath, content) {
 /**
  * Check which Atlas files already exist in the project
  */
-function checkExistingFrameFiles(projectPath) {
+function checkExistingAtlasFiles(projectPath) {
   const existingFiles = [];
   const filesToCheck = [
-    { name: 'CLAUDE.md', path: path.join(projectPath, FRAME_FILES.CLAUDE) },
-    { name: 'STRUCTURE.json', path: path.join(projectPath, FRAME_FILES.STRUCTURE) },
-    { name: 'PROJECT_NOTES.md', path: path.join(projectPath, FRAME_FILES.NOTES) },
-    { name: 'tasks.json', path: path.join(projectPath, FRAME_FILES.TASKS) },
-    { name: 'QUICKSTART.md', path: path.join(projectPath, FRAME_FILES.QUICKSTART) },
-    { name: '.atlas/', path: path.join(projectPath, FRAME_DIR) }
+    { name: 'CLAUDE.md', path: path.join(projectPath, ATLAS_FILES.CLAUDE) },
+    { name: 'STRUCTURE.json', path: path.join(projectPath, ATLAS_FILES.STRUCTURE) },
+    { name: 'PROJECT_NOTES.md', path: path.join(projectPath, ATLAS_FILES.NOTES) },
+    { name: 'tasks.json', path: path.join(projectPath, ATLAS_FILES.TASKS) },
+    { name: 'QUICKSTART.md', path: path.join(projectPath, ATLAS_FILES.QUICKSTART) },
+    { name: '.atlas/', path: path.join(projectPath, ATLAS_DIR) }
   ];
 
   for (const file of filesToCheck) {
@@ -85,32 +85,53 @@ function checkGitignore(projectPath) {
   const gitignorePath = path.join(projectPath, '.gitignore');
   const exists = fs.existsSync(gitignorePath);
   let hasAtlasEntries = false;
+  let hasClaudeMdEntry = false;
 
   if (exists) {
     const content = fs.readFileSync(gitignorePath, 'utf8');
-    hasAtlasEntries = content.includes('.atlas') || content.includes(FRAME_DIR);
+    hasAtlasEntries = content.includes('.atlas') || content.includes(ATLAS_DIR);
+    hasClaudeMdEntry = content.includes('CLAUDE.md');
   }
 
-  return { exists, hasAtlasEntries, path: gitignorePath };
+  return { exists, hasAtlasEntries, hasClaudeMdEntry, path: gitignorePath };
 }
 
 /**
  * Add Atlas entries to .gitignore
  */
-function addToGitignore(projectPath, createNew = false) {
+function addToGitignore(projectPath, createNew = false, includeClaudeMd = false) {
   const gitignorePath = path.join(projectPath, '.gitignore');
-  const atlasEntries = `
-# Atlas project files
-.atlas/
-`;
+
+  const baseEntries = [
+    '.atlas/',
+    'STRUCTURE.json',
+    'PROJECT_NOTES.md',
+    'tasks.json',
+    'QUICKSTART.md'
+  ];
+
+  if (includeClaudeMd) {
+    baseEntries.push('CLAUDE.md');
+  }
 
   if (createNew) {
-    fs.writeFileSync(gitignorePath, atlasEntries.trim() + '\n', 'utf8');
+    const content = '# Atlas project files\n' + baseEntries.join('\n') + '\n';
+    fs.writeFileSync(gitignorePath, content, 'utf8');
   } else {
-    const existingContent = fs.readFileSync(gitignorePath, 'utf8');
-    // Check if already has the entries
-    if (!existingContent.includes('.atlas')) {
-      const newContent = existingContent.trimEnd() + '\n' + atlasEntries;
+    let existingContent = fs.readFileSync(gitignorePath, 'utf8');
+
+    // Find entries that need to be added
+    const entriesToAdd = baseEntries.filter(entry => !existingContent.includes(entry));
+
+    if (entriesToAdd.length > 0) {
+      // Add header if no Atlas entries exist yet
+      if (!existingContent.includes('.atlas') && !existingContent.includes('# Atlas')) {
+        existingContent = existingContent.trimEnd() + '\n\n# Atlas project files\n';
+      } else {
+        existingContent = existingContent.trimEnd() + '\n';
+      }
+
+      const newContent = existingContent + entriesToAdd.join('\n') + '\n';
       fs.writeFileSync(gitignorePath, newContent, 'utf8');
     }
   }
@@ -120,7 +141,7 @@ function addToGitignore(projectPath, createNew = false) {
  * Show confirmation dialog before initializing Atlas project
  */
 async function showInitializeConfirmation(projectPath) {
-  const existingFiles = checkExistingFrameFiles(projectPath);
+  const existingFiles = checkExistingAtlasFiles(projectPath);
   const gitignoreInfo = checkGitignore(projectPath);
 
   let message = 'This will create the following files in your project:\n\n';
@@ -165,68 +186,86 @@ async function showInitializeConfirmation(projectPath) {
       defaultId: 1,
       title: 'Create .gitignore?',
       message: 'Create .gitignore?',
-      detail: 'No .gitignore file found. Would you like to create one with Atlas files excluded?\n\nThis prevents accidentally committing the .atlas/ config directory.'
+      detail: 'No .gitignore file found. Would you like to create one with Atlas files excluded?\n\nThis prevents accidentally committing Atlas config files.'
     });
     createGitignore = gitignoreResult.response === 1;
+  }
+
+  // Ask if user wants to ignore CLAUDE.md (if not already in gitignore)
+  let ignoreClaudeMd = false;
+  const willAddGitignore = createGitignore || (gitignoreInfo.exists && !gitignoreInfo.hasAtlasEntries);
+  const shouldAskAboutClaudeMd = (createGitignore || gitignoreInfo.exists) && !gitignoreInfo.hasClaudeMdEntry;
+
+  if (shouldAskAboutClaudeMd) {
+    const claudeMdResult = await dialog.showMessageBox(mainWindow, {
+      type: 'question',
+      buttons: ['No, keep it tracked', 'Yes, ignore it'],
+      defaultId: 0,
+      title: 'Ignore CLAUDE.md?',
+      message: 'Also ignore CLAUDE.md?',
+      detail: 'CLAUDE.md contains AI instructions for your project.\n\n• Keep tracked: Share instructions with your team\n• Ignore: Keep instructions private to you'
+    });
+    ignoreClaudeMd = claudeMdResult.response === 1;
   }
 
   return {
     confirmed: true,
     gitignoreInfo,
-    createGitignore
+    createGitignore,
+    ignoreClaudeMd
   };
 }
 
 /**
  * Initialize a project as Atlas project
  */
-function initializeFrameProject(projectPath, projectName) {
+function initializeAtlasProject(projectPath, projectName) {
   const name = projectName || path.basename(projectPath);
-  const frameDirPath = path.join(projectPath, FRAME_DIR);
+  const atlasDirPath = path.join(projectPath, ATLAS_DIR);
 
   // Create .atlas directory
-  if (!fs.existsSync(frameDirPath)) {
-    fs.mkdirSync(frameDirPath, { recursive: true });
+  if (!fs.existsSync(atlasDirPath)) {
+    fs.mkdirSync(atlasDirPath, { recursive: true });
   }
 
   // Create .atlas/config.json
-  const config = templates.getFrameConfigTemplate(name);
+  const config = templates.getAtlasConfigTemplate(name);
   fs.writeFileSync(
-    path.join(frameDirPath, FRAME_CONFIG_FILE),
+    path.join(atlasDirPath, ATLAS_CONFIG_FILE),
     JSON.stringify(config, null, 2),
     'utf8'
   );
 
-  // Create root-level Frame files (only if they don't exist)
+  // Create root-level Atlas files (only if they don't exist)
 
   // CLAUDE.md - Main instructions file for Claude Code
   createFileIfNotExists(
-    path.join(projectPath, FRAME_FILES.CLAUDE),
+    path.join(projectPath, ATLAS_FILES.CLAUDE),
     templates.getClaudeTemplate(name)
   );
 
   createFileIfNotExists(
-    path.join(projectPath, FRAME_FILES.STRUCTURE),
+    path.join(projectPath, ATLAS_FILES.STRUCTURE),
     templates.getStructureTemplate(name)
   );
 
   createFileIfNotExists(
-    path.join(projectPath, FRAME_FILES.NOTES),
+    path.join(projectPath, ATLAS_FILES.NOTES),
     templates.getNotesTemplate(name)
   );
 
   createFileIfNotExists(
-    path.join(projectPath, FRAME_FILES.TASKS),
+    path.join(projectPath, ATLAS_FILES.TASKS),
     templates.getTasksTemplate(name)
   );
 
   createFileIfNotExists(
-    path.join(projectPath, FRAME_FILES.QUICKSTART),
+    path.join(projectPath, ATLAS_FILES.QUICKSTART),
     templates.getQuickstartTemplate(name)
   );
 
   // Update workspace to mark as Atlas project
-  workspace.updateProjectFrameStatus(projectPath, true);
+  workspace.updateProjectAtlasStatus(projectPath, true);
 
   return config;
 }
@@ -235,19 +274,19 @@ function initializeFrameProject(projectPath, projectName) {
  * Setup IPC handlers
  */
 function setupIPC(ipcMain) {
-  ipcMain.on(IPC.CHECK_IS_FRAME_PROJECT, (event, projectPath) => {
-    const isFrame = isFrameProject(projectPath);
-    event.sender.send(IPC.IS_FRAME_PROJECT_RESULT, { projectPath, isFrame });
+  ipcMain.on(IPC.CHECK_IS_ATLAS_PROJECT, (event, projectPath) => {
+    const isAtlas = isAtlasProject(projectPath);
+    event.sender.send(IPC.IS_ATLAS_PROJECT_RESULT, { projectPath, isAtlas });
   });
 
-  ipcMain.on(IPC.INITIALIZE_FRAME_PROJECT, async (event, { projectPath, projectName }) => {
+  ipcMain.on(IPC.INITIALIZE_ATLAS_PROJECT, async (event, { projectPath, projectName }) => {
     try {
       // Show confirmation dialog first
       const result = await showInitializeConfirmation(projectPath);
 
       if (!result.confirmed) {
         // User cancelled
-        event.sender.send(IPC.FRAME_PROJECT_INITIALIZED, {
+        event.sender.send(IPC.ATLAS_PROJECT_INITIALIZED, {
           projectPath,
           success: false,
           cancelled: true
@@ -255,18 +294,18 @@ function setupIPC(ipcMain) {
         return;
       }
 
-      const config = initializeFrameProject(projectPath, projectName);
+      const config = initializeAtlasProject(projectPath, projectName);
 
       // Handle .gitignore
       if (result.createGitignore) {
         // User chose to create a new .gitignore
-        addToGitignore(projectPath, true);
-      } else if (result.gitignoreInfo.exists && !result.gitignoreInfo.hasAtlasEntries) {
-        // Add to existing .gitignore
-        addToGitignore(projectPath, false);
+        addToGitignore(projectPath, true, result.ignoreClaudeMd);
+      } else if (result.gitignoreInfo.exists) {
+        // Add missing entries to existing .gitignore (including CLAUDE.md if requested)
+        addToGitignore(projectPath, false, result.ignoreClaudeMd);
       }
 
-      event.sender.send(IPC.FRAME_PROJECT_INITIALIZED, {
+      event.sender.send(IPC.ATLAS_PROJECT_INITIALIZED, {
         projectPath,
         config,
         success: true
@@ -277,7 +316,7 @@ function setupIPC(ipcMain) {
       event.sender.send(IPC.WORKSPACE_UPDATED, projects);
     } catch (err) {
       console.error('Error initializing Atlas project:', err);
-      event.sender.send(IPC.FRAME_PROJECT_INITIALIZED, {
+      event.sender.send(IPC.ATLAS_PROJECT_INITIALIZED, {
         projectPath,
         success: false,
         error: err.message
@@ -285,16 +324,16 @@ function setupIPC(ipcMain) {
     }
   });
 
-  ipcMain.on(IPC.GET_FRAME_CONFIG, (event, projectPath) => {
-    const config = getFrameConfig(projectPath);
-    event.sender.send(IPC.FRAME_CONFIG_DATA, { projectPath, config });
+  ipcMain.on(IPC.GET_ATLAS_CONFIG, (event, projectPath) => {
+    const config = getAtlasConfig(projectPath);
+    event.sender.send(IPC.ATLAS_CONFIG_DATA, { projectPath, config });
   });
 }
 
 module.exports = {
   init,
-  isFrameProject,
-  getFrameConfig,
-  initializeFrameProject,
+  isAtlasProject,
+  getAtlasConfig,
+  initializeAtlasProject,
   setupIPC
 };

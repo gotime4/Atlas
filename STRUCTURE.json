@@ -26,7 +26,7 @@
         "fileTree",
         "promptLogger",
         "workspace",
-        "frameProject",
+        "atlasProject",
         "fileEditor",
         "tasksManager",
         "pluginsManager",
@@ -379,7 +379,7 @@
         "fs",
         "path",
         "shared/ipcChannels",
-        "shared/frameConstants"
+        "shared/atlasConstants"
       ],
       "functions": {
         "init": {
@@ -630,7 +630,7 @@
         "addProject",
         "removeProject",
         "updateProjectLastOpened",
-        "updateProjectFrameStatus",
+        "updateProjectAtlasStatus",
         "setupIPC"
       ],
       "depends": [
@@ -638,7 +638,7 @@
         "path",
         "os",
         "shared/ipcChannels",
-        "shared/frameConstants"
+        "shared/atlasConstants"
       ],
       "functions": {
         "init": {
@@ -677,7 +677,7 @@
           "params": [
             "projectPath",
             "name",
-            "isFrameProject = false"
+            "isAtlasProject = false"
           ],
           "purpose": "Add project to workspace"
         },
@@ -695,13 +695,13 @@
           ],
           "purpose": "Update project's last opened timestamp"
         },
-        "updateProjectFrameStatus": {
+        "updateProjectAtlasStatus": {
           "line": 146,
           "params": [
             "projectPath",
-            "isFrame"
+            "isAtlas"
           ],
-          "purpose": "Update project's Frame status"
+          "purpose": "Update project's Atlas status"
         },
         "setupIPC": {
           "line": 162,
@@ -1066,11 +1066,11 @@
         "updateProjectUI",
         "selectProjectFolder",
         "createNewProject",
-        "getIsFrameProject",
-        "setIsFrameProject",
-        "onFrameStatusChange",
-        "onFrameInitialized",
-        "initializeAsFrameProject"
+        "getIsAtlasProject",
+        "setIsAtlasProject",
+        "onAtlasStatusChange",
+        "onAtlasInitialized",
+        "initializeAsAtlasProject"
       ],
       "depends": [
         "electron",
@@ -1085,88 +1085,89 @@
           "purpose": "Initialize state module"
         },
         "getProjectPath": {
-          "line": 37,
+          "line": 44,
           "purpose": "Get current project path"
         },
         "setMultiTerminalUI": {
-          "line": 44,
+          "line": 51,
           "params": [
             "ui"
           ],
           "purpose": "Set MultiTerminalUI reference for terminal session management"
         },
         "setProjectPath": {
-          "line": 51,
+          "line": 58,
           "params": [
             "path"
           ],
           "purpose": "Set project path and switch terminal session"
         },
         "onProjectChange": {
-          "line": 81,
+          "line": 88,
           "params": [
             "callback"
           ],
           "purpose": "Register callback for project change"
         },
-        "getIsFrameProject": {
-          "line": 88,
-          "purpose": "Get Frame project status"
-        },
-        "setIsFrameProject": {
+        "getIsAtlasProject": {
           "line": 95,
-          "params": [
-            "isFrame"
-          ],
-          "purpose": "Set Frame project status"
+          "purpose": "Get Atlas project status"
         },
-        "onFrameStatusChange": {
-          "line": 106,
+        "setIsAtlasProject": {
+          "line": 102,
           "params": [
-            "callback"
+            "isAtlas"
           ],
-          "purpose": "Register callback for Frame status change"
+          "purpose": "Set Atlas project status"
         },
-        "onFrameInitialized": {
+        "onAtlasStatusChange": {
           "line": 113,
           "params": [
             "callback"
           ],
-          "purpose": "Register callback for Frame project initialized"
+          "purpose": "Register callback for Atlas status change"
         },
-        "updateFrameUI": {
+        "onAtlasInitialized": {
           "line": 120,
-          "purpose": "Update Frame-related UI"
+          "params": [
+            "callback"
+          ],
+          "purpose": "Register callback for Atlas project initialized"
         },
-        "initializeAsFrameProject": {
-          "line": 134,
-          "purpose": "Initialize current project as Frame project"
+        "updateAtlasUI": {
+          "line": 127,
+          "purpose": "Update Atlas-related UI"
+        },
+        "initializeAsAtlasProject": {
+          "line": 141,
+          "purpose": "Initialize current project as Atlas project"
         },
         "updateProjectUI": {
-          "line": 147,
+          "line": 154,
           "purpose": "Update project UI elements"
         },
         "selectProjectFolder": {
-          "line": 176,
+          "line": 183,
           "purpose": "Request folder selection"
         },
         "createNewProject": {
-          "line": 183,
+          "line": 190,
           "purpose": "Request new project creation"
         },
         "setupIPC": {
-          "line": 191
+          "line": 198
         }
       },
       "ipc": {
         "listens": [
           "PROJECT_SELECTED",
-          "IS_FRAME_PROJECT_RESULT",
-          "FRAME_PROJECT_INITIALIZED"
+          "IS_ATLAS_PROJECT_RESULT",
+          "ATLAS_PROJECT_INITIALIZED"
         ],
         "emits": [
-          "CHECK_IS_FRAME_PROJECT",
-          "INITIALIZE_FRAME_PROJECT",
+          "CHECK_IS_ATLAS_PROJECT",
+          "CHECK_IS_ATLAS_PROJECT",
+          "INITIALIZE_ATLAS_PROJECT",
           "SELECT_PROJECT_FOLDER",
           "CREATE_NEW_PROJECT"
         ]
@@ -1525,7 +1526,7 @@
           "params": [
             "projectPath",
             "projectName",
-            "isFrameProject = false"
+            "isAtlasProject = false"
           ],
           "purpose": "Add project to workspace"
         },
@@ -3814,21 +3815,21 @@
           "purpose": "Check if file should be ignored"
         },
         "handleFileChange": {
-          "line": 78,
+          "line": 77,
           "params": [
             "filePath"
           ],
           "purpose": "Handle file change event"
         },
         "snapshotFile": {
-          "line": 122,
+          "line": 121,
           "params": [
             "filePath"
           ],
           "purpose": "Take a snapshot of a file (for tracking changes)"
         },
         "snapshotDirectory": {
-          "line": 138,
+          "line": 137,
           "params": [
             "dirPath",
             "depth = 0"
@@ -3836,7 +3837,7 @@
           "purpose": "Take snapshots of all files in a directory"
         },
         "generateDiff": {
-          "line": 163,
+          "line": 162,
           "params": [
             "oldContent",
             "newContent"
@@ -3844,7 +3845,7 @@
           "purpose": "Generate a simple line-by-line diff"
         },
         "computeLCS": {
-          "line": 231,
+          "line": 230,
           "params": [
             "oldLines",
             "newLines"
@@ -3852,32 +3853,32 @@
           "purpose": "Compute Longest Common Subsequence for diff"
         },
         "getPendingChanges": {
-          "line": 270,
+          "line": 269,
           "purpose": "Get all pending changes"
         },
         "getFileDiff": {
-          "line": 277,
+          "line": 276,
           "params": [
             "filePath"
           ],
           "purpose": "Get diff for a specific file"
         },
         "acceptChanges": {
-          "line": 284,
+          "line": 283,
           "params": [
             "filePath"
           ],
           "purpose": "Accept changes (update snapshot to current)"
         },
         "revertChanges": {
-          "line": 297,
+          "line": 296,
           "params": [
             "filePath"
           ],
           "purpose": "Revert changes (restore original content)"
         },
         "revertHunk": {
-          "line": 315,
+          "line": 314,
           "params": [
             "filePath",
             "hunkIndex"
@@ -3885,15 +3886,15 @@
           "purpose": "Revert a specific hunk"
         },
         "clearAllChanges": {
-          "line": 358,
+          "line": 357,
           "purpose": "Clear all pending changes (accept all)"
         },
         "stopWatching": {
-          "line": 369,
+          "line": 368,
           "purpose": "Stop watching files"
         },
         "setupIPC": {
-          "line": 379,
+          "line": 378,
           "params": [
             "ipcMain"
           ],
@@ -4363,6 +4364,194 @@
           "REMOVE_MCP",
           "ADD_MCP"
         ]
+      }
+    },
+    "main/atlasProject": {
+      "file": "src/main/atlasProject.js",
+      "description": "A",
+      "exports": [
+        "init",
+        "isAtlasProject",
+        "getAtlasConfig",
+        "initializeAtlasProject",
+        "setupIPC"
+      ],
+      "depends": [
+        "fs",
+        "path",
+        "electron",
+        "shared/ipcChannels",
+        "shared/atlasConstants",
+        "shared/atlasTemplates",
+        "workspace"
+      ],
+      "functions": {
+        "init": {
+          "line": 19,
+          "params": [
+            "window"
+          ],
+          "purpose": "Initialize atlas project module"
+        },
+        "isAtlasProject": {
+          "line": 26,
+          "params": [
+            "projectPath"
+          ],
+          "purpose": "Check if a project is an Atlas project"
+        },
+        "getAtlasConfig": {
+          "line": 34,
+          "params": [
+            "projectPath"
+          ],
+          "purpose": "Get Atlas config from project"
+        },
+        "createFileIfNotExists": {
+          "line": 47,
+          "params": [
+            "filePath",
+            "content"
+          ],
+          "purpose": "Create file if it doesn't exist"
+        },
+        "checkExistingAtlasFiles": {
+          "line": 61,
+          "params": [
+            "projectPath"
+          ],
+          "purpose": "Check which Atlas files already exist in the project"
+        },
+        "checkGitignore": {
+          "line": 84,
+          "params": [
+            "projectPath"
+          ],
+          "purpose": "Check if .gitignore exists and if Atlas files are already in it"
+        },
+        "addToGitignore": {
+          "line": 102,
+          "params": [
+            "projectPath",
+            "createNew = false",
+            "includeClaudeMd = false"
+          ],
+          "purpose": "Add Atlas entries to .gitignore"
+        },
+        "showInitializeConfirmation": {
+          "line": 143,
+          "params": [
+            "projectPath"
+          ],
+          "purpose": "Show confirmation dialog before initializing Atlas project"
+        },
+        "initializeAtlasProject": {
+          "line": 222,
+          "params": [
+            "projectPath",
+            "projectName"
+          ],
+          "purpose": "Initialize a project as Atlas project"
+        },
+        "setupIPC": {
+          "line": 276,
+          "params": [
+            "ipcMain"
+          ],
+          "purpose": "Setup IPC handlers"
+        }
+      },
+      "ipc": {
+        "listens": [
+          "CHECK_IS_ATLAS_PROJECT",
+          "INITIALIZE_ATLAS_PROJECT",
+          "GET_ATLAS_CONFIG"
+        ],
+        "emits": [
+          "IS_ATLAS_PROJECT_RESULT",
+          "ATLAS_PROJECT_INITIALIZED",
+          "WORKSPACE_UPDATED",
+          "ATLAS_CONFIG_DATA"
+        ]
+      }
+    },
+    "shared/atlasConstants": {
+      "file": "src/shared/atlasConstants.js",
+      "description": "A",
+      "exports": [
+        "ATLAS_DIR",
+        "ATLAS_CONFIG_FILE",
+        "WORKSPACE_DIR",
+        "WORKSPACE_FILE",
+        "ATLAS_FILES",
+        "ATLAS_VERSION"
+      ],
+      "depends": [],
+      "functions": {}
+    },
+    "shared/atlasTemplates": {
+      "file": "src/shared/atlasTemplates.js",
+      "description": "A",
+      "exports": [
+        "getClaudeTemplate",
+        "getStructureTemplate",
+        "getNotesTemplate",
+        "getTasksTemplate",
+        "getQuickstartTemplate",
+        "getAtlasConfigTemplate"
+      ],
+      "depends": [],
+      "functions": {
+        "getDateString": {
+          "line": 10,
+          "purpose": "Get current date in YYYY-MM-DD format"
+        },
+        "getISOTimestamp": {
+          "line": 17,
+          "purpose": "Get current ISO timestamp"
+        },
+        "getClaudeTemplate": {
+          "line": 24,
+          "params": [
+            "projectName"
+          ],
+          "purpose": "CLAUDE.md template - Main instructions file for Claude Code"
+        },
+        "getStructureTemplate": {
+          "line": 193,
+          "params": [
+            "projectName"
+          ],
+          "purpose": "STRUCTURE.json template"
+        },
+        "getNotesTemplate": {
+          "line": 217,
+          "params": [
+            "projectName"
+          ],
+          "purpose": "PROJECT_NOTES.md template"
+        },
+        "getTasksTemplate": {
+          "line": 237,
+          "params": [
+            "projectName"
+          ],
+          "purpose": "tasks.json template"
+        },
+        "getQuickstartTemplate": {
+          "line": 287,
+          "params": [
+            "projectName"
+          ],
+          "purpose": "QUICKSTART.md template"
+        },
+        "getAtlasConfigTemplate": {
+          "line": 353,
+          "params": [
+            "projectName"
+          ],
+          "purpose": ".atlas/config.json template"
+        }
       }
     }
   },

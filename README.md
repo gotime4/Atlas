@@ -106,7 +106,7 @@ This app does all of that in one window, with a clean VS Code-inspired interface
 
 | Component | Technology | Why? |
 |-----------|-----------|------|
-| Desktop Atlaswork | Electron 28 | Cross-platform, mature, well-documented |
+| Desktop Framework | Electron 28 | Cross-platform, mature, well-documented |
 | Terminal Emulator | xterm.js 5.3 | Industry standard (used by VS Code) |
 | PTY | node-pty 1.0 | Real pseudo-terminal, not subprocess pipes |
 | Bundler | esbuild | Fast bundling for modular renderer code |
@@ -120,12 +120,60 @@ This app does all of that in one window, with a clean VS Code-inspired interface
 
 ## Installation
 
-### Prerequisites
-- Node.js 16+ (https://nodejs.org)
-- npm (comes with Node.js)
-- Git (optional, for cloning)
+### Download (Recommended)
 
-### Steps
+#### macOS
+1. Download `Atlas-x.x.x-arm64.dmg` from [Releases](https://github.com/gotime4/Atlas/releases)
+2. Open the DMG and drag Atlas to Applications
+3. Right-click Atlas and select "Open" (first time only, to bypass Gatekeeper)
+
+#### Windows
+1. Download `Atlas Setup x.x.x.exe` from [Releases](https://github.com/gotime4/Atlas/releases)
+2. Run the installer
+
+### Requirements
+
+#### 1. Claude Code CLI (Required)
+```bash
+npm install -g @anthropic-ai/claude-code
+```
+You'll need a Claude Pro/Max subscription or API key. See [Claude Code docs](https://docs.anthropic.com/en/docs/claude-code).
+
+#### 2. Git (Required for Git features)
+Most Macs have Git pre-installed. Check with:
+```bash
+git --version
+```
+
+If not installed:
+```bash
+# macOS
+xcode-select --install
+
+# Windows - download from https://git-scm.com/
+```
+
+Configure your identity (required for commits):
+```bash
+git config --global user.name "Your Name"
+git config --global user.email "your@email.com"
+```
+
+#### 3. GitHub CLI (Optional, for GitHub panel features)
+```bash
+# macOS
+brew install gh
+
+# Windows
+winget install GitHub.cli
+```
+
+Then authenticate:
+```bash
+gh auth login
+```
+
+### Build from Source
 
 ```bash
 # Clone the repo
@@ -137,14 +185,6 @@ npm install
 
 # Run the app
 npm start
-```
-
-That's it! The app will launch.
-
-### Installing Claude Code
-If you don't have Claude Code installed:
-```bash
-npm install -g @anthropic-ai/claude-code
 ```
 
 ## Usage
